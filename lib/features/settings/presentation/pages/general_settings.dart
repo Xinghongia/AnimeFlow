@@ -302,8 +302,9 @@ class _GeneralSettingsPageState extends ConsumerState<GeneralSettingsPage> {
                           value: _echImageLoading,
                           onChanged: (value) async {
                             await AppSettings.setEchImageLoading(value);
-                            if (mounted)
+                            if (mounted) {
                               setState(() => _echImageLoading = value);
+                            }
                           },
                         ),
                         AnimatedSize(
