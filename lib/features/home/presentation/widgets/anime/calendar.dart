@@ -251,12 +251,14 @@ class _CalendarViewState extends State<CalendarView> {
   }
 
   Widget _buildCalendarPosterSkeleton(BuildContext context) {
-    final isDark = SystemUtil.isDarkTheme(context);
-    final baseColor = isDark ? Colors.grey[850]! : Colors.grey[300]!;
-    final highlightColor = isDark ? Colors.grey[700]! : Colors.grey[100]!;
-    final filler = isDark
-        ? Theme.of(context).colorScheme.surfaceContainerHighest
-        : Theme.of(context).colorScheme.surface;
+    final colorScheme = Theme.of(context).colorScheme;
+    final isDark = colorScheme.brightness == Brightness.dark;
+    final baseColor = colorScheme.surfaceContainerHighest;
+    final highlightColor = Color.lerp(
+      baseColor,
+      isDark ? colorScheme.onSurface : colorScheme.surface,
+      isDark ? 0.08 : 0.65,
+    )!;
 
     return Shimmer.fromColors(
       baseColor: baseColor,
@@ -264,7 +266,7 @@ class _CalendarViewState extends State<CalendarView> {
       child: Stack(
         fit: StackFit.expand,
         children: [
-          Positioned.fill(child: Container(color: filler)),
+          Positioned.fill(child: Container(color: baseColor)),
           Positioned(
             left: 10,
             right: 10,
@@ -277,7 +279,7 @@ class _CalendarViewState extends State<CalendarView> {
                   height: 12,
                   width: double.infinity,
                   decoration: BoxDecoration(
-                    color: filler,
+                    color: baseColor,
                     borderRadius: BorderRadius.circular(4),
                   ),
                 ),
@@ -286,7 +288,7 @@ class _CalendarViewState extends State<CalendarView> {
                   height: 12,
                   width: 72,
                   decoration: BoxDecoration(
-                    color: filler,
+                    color: baseColor,
                     borderRadius: BorderRadius.circular(4),
                   ),
                 ),
