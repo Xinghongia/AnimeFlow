@@ -799,5 +799,6 @@
   "imageCacheClearing": "Clearing…",
   "imageCacheSizeFailed": "Could not calculate cache size. Please retry.",
   "imageCacheCleared": "Image cache cleared",
-  "imageCacheClearFailed": "Could not clear image cache. Please try again."
+  "imageCacheClearFailed": "Could not clear image cache. Please try again.",
+  "popularAnimeUpdateAvailable": "New popular anime rankings available · Tap to refresh"
 }

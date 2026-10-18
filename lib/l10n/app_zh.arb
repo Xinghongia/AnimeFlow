@@ -799,5 +799,6 @@
   "imageCacheClearing": "正在清除…",
   "imageCacheSizeFailed": "统计失败，请重试",
   "imageCacheCleared": "图片缓存已清除",
-  "imageCacheClearFailed": "清除失败，请稍后重试"
+  "imageCacheClearFailed": "清除失败，请稍后重试",
+  "popularAnimeUpdateAvailable": "热门动画有更新，点击刷新"
 }

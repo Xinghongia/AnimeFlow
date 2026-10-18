@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:anime_flow/features/anime_info/data/repositories/anime_info_repository_provider.dart';
+import 'package:anime_flow/features/anime_info/data/repositories/anime_info_repository.dart';
 import 'package:anime_flow/shared/models/flow/collection_update_result.dart';
 import 'package:anime_flow/shared/models/bangumi/user_collections_item.dart';
 import 'package:anime_flow/shared/models/enums/collection_sort.dart';

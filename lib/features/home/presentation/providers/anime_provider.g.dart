@@ -33,7 +33,7 @@ final class AnimeHotProvider
   AnimeHot create() => AnimeHot();
 }
 
-String _$animeHotHash() => r'e47bfbd49b088563b29e0bf46d582160971b4d9c';
+String _$animeHotHash() => r'76f26301c17a3011e7f6a9189cf93339be932519';
 
 abstract class _$AnimeHot extends $AsyncNotifier<AnimeHotState> {
   FutureOr<AnimeHotState> build();

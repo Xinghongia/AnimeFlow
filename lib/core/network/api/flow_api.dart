@@ -434,12 +434,15 @@ class FlowApi {
   }
 
   /// 获取热门
-  static Future<HotItem> getHotService(int limit, int offset) async {
-    return await _client.get(AnimeFlowApi.hot, queryParameters: {
-      'type': 2,
-      'limit': limit,
-      'offset': offset
-    }).then((value) => HotItem.fromJson(value.data));
+  static Future<HotItem> getHotService(int limit, int offset,
+      {CancelToken? cancelToken}) async {
+    return await _client.get(AnimeFlowApi.hot,
+        cancelToken: cancelToken,
+        queryParameters: {
+          'type': 2,
+          'limit': limit,
+          'offset': offset
+        }).then((value) => HotItem.fromJson(value.data));
   }
 
   ///根据id获取条目（已登录时携带 Flow Token，服务端换取 Bangumi token 返回 interest）

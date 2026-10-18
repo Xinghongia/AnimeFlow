@@ -4568,6 +4568,12 @@ abstract class AppLocalizations {
   /// In zh_Hans, this message translates to:
   /// **'清除失败，请稍后重试'**
   String get imageCacheClearFailed;
+
+  /// No description provided for @popularAnimeUpdateAvailable.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'热门动画有更新，点击刷新'**
+  String get popularAnimeUpdateAvailable;
 }
 
 class _AppLocalizationsDelegate

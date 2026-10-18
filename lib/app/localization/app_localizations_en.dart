@@ -2482,4 +2482,8 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get imageCacheClearFailed =>
       'Could not clear image cache. Please try again.';
+
+  @override
+  String get popularAnimeUpdateAvailable =>
+      'New popular anime rankings available · Tap to refresh';
 }

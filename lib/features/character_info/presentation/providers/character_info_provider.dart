@@ -1,5 +1,5 @@
 import 'package:anime_flow/core/network/api/flow_api.dart';
-import 'package:anime_flow/features/characters/data/repositories/character_repository_provider.dart';
+import 'package:anime_flow/features/characters/data/repositories/character_repository.dart';
 import 'package:anime_flow/shared/models/bangumi/character_comments_item.dart';
 import 'package:anime_flow/shared/models/bangumi/character_detail_item.dart';
 import 'package:anime_flow/shared/models/bangumi/character_subjects_item.dart';

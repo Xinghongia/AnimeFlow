@@ -2402,6 +2402,9 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get imageCacheClearFailed => '清除失败，请稍后重试';
+
+  @override
+  String get popularAnimeUpdateAvailable => '热门动画有更新，点击刷新';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hans`).
@@ -4801,6 +4804,9 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
 
   @override
   String get imageCacheClearFailed => '清除失败，请稍后重试';
+
+  @override
+  String get popularAnimeUpdateAvailable => '热门动画有更新，点击刷新';
 }
 
 /// The translations for Chinese, as used in Hong Kong, using the Han script (`zh_Hant_HK`).
@@ -7201,6 +7207,9 @@ class AppLocalizationsZhHantHk extends AppLocalizationsZh {
 
   @override
   String get imageCacheClearFailed => '清除失敗，請稍後重試';
+
+  @override
+  String get popularAnimeUpdateAvailable => '熱門動畫有更新，點擊重新整理';
 }
 
 /// The translations for Chinese, as used in Taiwan, using the Han script (`zh_Hant_TW`).
@@ -9602,4 +9611,7 @@ class AppLocalizationsZhHantTw extends AppLocalizationsZh {
 
   @override
   String get imageCacheClearFailed => '清除失敗，請稍後重試';
+
+  @override
+  String get popularAnimeUpdateAvailable => '熱門動畫有更新，點擊重新整理';
 }

@@ -41,6 +41,9 @@ class PopularAnimeView extends ConsumerWidget {
       data: (hotState) => SliverMainAxisGroup(
         slivers: [
           _buildTitleSliver(l10n),
+          if (hotState.isRefreshing)
+            const SliverToBoxAdapter(child: LinearProgressIndicator()),
+          if (hotState.hasUpdate) _buildUpdateSliver(context, ref, l10n),
           _buildGrid(
             SliverChildBuilderDelegate(
               (BuildContext context, int index) {
@@ -102,7 +105,11 @@ class PopularAnimeView extends ConsumerWidget {
                 ),
               ),
             ),
-          if (!hotState.hasMore && hotState.errorMessage == null)
+          if (hotState.hasUpdate) _buildUpdateSliver(context, ref, l10n),
+          if (!hotState.hasMore &&
+              hotState.errorMessage == null &&
+              !hotState.hasUpdate &&
+              !hotState.isRefreshing)
             const SliverToBoxAdapter(
               child: NoMoreIndicator(),
             ),
@@ -133,6 +140,20 @@ class PopularAnimeView extends ConsumerWidget {
           delegate: delegate,
         );
       },
+    );
+  }
+
+  Widget _buildUpdateSliver(
+      BuildContext context, WidgetRef ref, AppLocalizations l10n) {
+    return SliverToBoxAdapter(
+      child: TextButton.icon(
+        onPressed: () {
+          Scrollable.maybeOf(context)?.position.jumpTo(0);
+          ref.read(animeHotProvider.notifier).applyUpdate();
+        },
+        icon: const Icon(Icons.refresh),
+        label: Text(l10n.popularAnimeUpdateAvailable),
+      ),
     );
   }
 

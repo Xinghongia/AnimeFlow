@@ -7,6 +7,12 @@ import 'package:anime_flow/shared/models/bangumi/actor_item.dart';
 import 'package:anime_flow/shared/models/bangumi/character_detail_item.dart';
 import 'package:anime_flow/shared/models/bangumi/character_subjects_item.dart';
 import 'package:dio/dio.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
+
+part 'character_repository.g.dart';
+
+@Riverpod(keepAlive: true)
+CharacterRepository characterRepository(Ref ref) => CharacterRepository();
 
 /// 角色公开资料
 class CharacterRepository {

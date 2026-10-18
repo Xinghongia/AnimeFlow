@@ -9,7 +9,6 @@ import 'package:anime_flow/core/network/clients/flow_client.dart';
 import 'package:anime_flow/core/network/core/dio_factory.dart';
 import 'package:anime_flow/core/settings/storage.dart';
 import 'package:anime_flow/features/anime_info/data/repositories/anime_info_repository.dart';
-import 'package:anime_flow/features/anime_info/data/repositories/anime_info_repository_provider.dart';
 import 'package:anime_flow/features/anime_info/presentation/providers/anime_info_provider.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

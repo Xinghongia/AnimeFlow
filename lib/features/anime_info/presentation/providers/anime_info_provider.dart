@@ -1,7 +1,7 @@
 import 'dart:async';
 
-import 'package:anime_flow/features/anime_info/data/repositories/anime_info_repository_provider.dart';
-import 'package:anime_flow/features/characters/data/repositories/character_repository_provider.dart';
+import 'package:anime_flow/features/anime_info/data/repositories/anime_info_repository.dart';
+import 'package:anime_flow/features/characters/data/repositories/character_repository.dart';
 import 'package:anime_flow/features/user/application/collection_revision_provider.dart';
 import 'package:anime_flow/shared/models/flow/collection_update_result.dart';
 import 'package:anime_flow/shared/models/bangumi/actor_item.dart';

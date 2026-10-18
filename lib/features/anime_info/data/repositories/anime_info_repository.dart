@@ -4,12 +4,24 @@ import 'package:anime_flow/core/cache/json_response_cache.dart';
 import 'package:anime_flow/core/settings/storage.dart';
 import 'package:anime_flow/features/anime_info/data/datasources/anime_info_local_data_source.dart';
 import 'package:anime_flow/features/anime_info/data/datasources/anime_info_remote_data_source.dart';
+import 'package:anime_flow/features/user/application/collection_revision_provider.dart';
 import 'package:anime_flow/shared/models/bangumi/producers_item.dart';
 import 'package:anime_flow/shared/models/bangumi/related_subjects_item.dart';
 import 'package:anime_flow/shared/models/bangumi/subject_comments_item.dart';
 import 'package:anime_flow/shared/models/bangumi/subjects_info_item.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
+
+part 'anime_info_repository.g.dart';
+
+@Riverpod(keepAlive: true)
+AnimeInfoRepository animeInfoRepository(Ref ref) {
+  final repository = AnimeInfoRepository();
+  ref.listen(
+      collectionRevisionProvider, (_, __) => repository.invalidateCache());
+  return repository;
+}
 
 class AnimeInfoRepository {
   final _local = AnimeInfoLocalDataSource();
