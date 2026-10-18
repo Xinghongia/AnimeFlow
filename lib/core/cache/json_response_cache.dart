@@ -14,6 +14,15 @@ class CachedJsonResponse<T> {
 /// 公开资料的持久化缓存：有效期内复用，过期后刷新，失败时保留旧数据。
 class JsonResponseCache {
   static const defaultMaxAge = Duration(hours: 12);
+  static final _revisions = Expando<int>();
+
+  /// 清理前发出的请求仍可交给页面，但不能重新写入已清理的缓存。
+  static int revisionOf(Box<String> box) => _revisions[box] ?? 0;
+
+  static Future<void> clear(Box<String> box) async {
+    _revisions[box] = revisionOf(box) + 1;
+    await box.clear();
+  }
 
   /// 读取缓存及其新鲜度，由调用方决定是否先展示旧数据并后台刷新。
   static CachedJsonResponse<T>? read<T>(
@@ -52,6 +61,7 @@ class JsonResponseCache {
     bool Function()? shouldCache,
   }) async {
     if (cancelToken?.isCancelled ?? false) throw cancelToken!.cancelError!;
+    final revision = revisionOf(box);
     final cached = read(box, key, fromJson: fromJson, maxAge: maxAge);
     if (!forceRefresh && cached != null && cached.isFresh) {
       return cached.data;
@@ -67,7 +77,10 @@ class JsonResponseCache {
       return cached.data;
     }
     if (cancelToken?.isCancelled ?? false) throw cancelToken!.cancelError!;
-    if (shouldCache != null && !shouldCache()) return result;
+    if (revision != revisionOf(box) ||
+        (shouldCache != null && !shouldCache())) {
+      return result;
+    }
     try {
       await box.put(
           key,

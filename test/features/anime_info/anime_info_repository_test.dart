@@ -6,6 +6,7 @@ import 'dart:typed_data';
 import 'package:anime_flow/app/router/model/info_route_extra.dart';
 import 'package:anime_flow/app/router/routes_args.dart';
 import 'package:anime_flow/core/auth/models/flow_token.dart';
+import 'package:anime_flow/core/cache/json_response_cache.dart';
 import 'package:anime_flow/core/network/clients/flow_client.dart';
 import 'package:anime_flow/core/network/core/dio_factory.dart';
 import 'package:anime_flow/core/settings/storage.dart';
@@ -217,6 +218,17 @@ void main() {
     final result = await repository.watchSubject(42, sessionId: null).toList();
     expect(result.single.name, 'cached');
     expect(remote.requests, isEmpty);
+  });
+
+  test(
+      'manual clearing does not let a pending subject response restore disk cache',
+      () async {
+    final result = repository.watchSubject(42, sessionId: null).toList();
+    await pumpEventQueue();
+    await JsonResponseCache.clear(Storage.animeInfoCache);
+    remote.requests.single.complete(reply(subject: subject('visible')));
+    expect((await result).single.name, 'visible');
+    expect(Storage.animeInfoCache.isEmpty, isTrue);
   });
 
   test('expired cache remains available if the current refresh fails',

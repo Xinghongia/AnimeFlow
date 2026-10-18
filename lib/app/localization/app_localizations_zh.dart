@@ -2405,6 +2405,39 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get popularAnimeUpdateAvailable => '热门动画有更新，点击刷新';
+
+  @override
+  String get cacheUsageTitle => '缓存总大小';
+
+  @override
+  String get imageCacheLabel => '图片';
+
+  @override
+  String get animeInfoCacheLabel => '条目详情';
+
+  @override
+  String get cacheSelectAll => '全选';
+
+  @override
+  String get cacheDeselectAll => '取消全选';
+
+  @override
+  String get cacheSelectedSize => '已选缓存';
+
+  @override
+  String get clearSelectedCache => '清理所选';
+
+  @override
+  String get clearSelectedCacheTitle => '清理所选缓存？';
+
+  @override
+  String get clearSelectedCacheDescription => '缓存会在下次使用时重新加载。下载的视频、观看记录和设置会保留。';
+
+  @override
+  String get selectedCacheCleared => '所选缓存已清理';
+
+  @override
+  String get selectedCacheClearFailed => '部分缓存清理失败，请重试';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hans`).
@@ -4807,6 +4840,39 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
 
   @override
   String get popularAnimeUpdateAvailable => '热门动画有更新，点击刷新';
+
+  @override
+  String get cacheUsageTitle => '缓存总大小';
+
+  @override
+  String get imageCacheLabel => '图片';
+
+  @override
+  String get animeInfoCacheLabel => '条目详情';
+
+  @override
+  String get cacheSelectAll => '全选';
+
+  @override
+  String get cacheDeselectAll => '取消全选';
+
+  @override
+  String get cacheSelectedSize => '已选缓存';
+
+  @override
+  String get clearSelectedCache => '清理所选';
+
+  @override
+  String get clearSelectedCacheTitle => '清理所选缓存？';
+
+  @override
+  String get clearSelectedCacheDescription => '缓存会在下次使用时重新加载。下载的视频、观看记录和设置会保留。';
+
+  @override
+  String get selectedCacheCleared => '所选缓存已清理';
+
+  @override
+  String get selectedCacheClearFailed => '部分缓存清理失败，请重试';
 }
 
 /// The translations for Chinese, as used in Hong Kong, using the Han script (`zh_Hant_HK`).
@@ -7210,6 +7276,39 @@ class AppLocalizationsZhHantHk extends AppLocalizationsZh {
 
   @override
   String get popularAnimeUpdateAvailable => '熱門動畫有更新，點擊重新整理';
+
+  @override
+  String get cacheUsageTitle => '快取總大小';
+
+  @override
+  String get imageCacheLabel => '圖片';
+
+  @override
+  String get animeInfoCacheLabel => '條目詳情';
+
+  @override
+  String get cacheSelectAll => '全選';
+
+  @override
+  String get cacheDeselectAll => '取消全選';
+
+  @override
+  String get cacheSelectedSize => '已選快取';
+
+  @override
+  String get clearSelectedCache => '清除所選';
+
+  @override
+  String get clearSelectedCacheTitle => '清除所選快取？';
+
+  @override
+  String get clearSelectedCacheDescription => '快取會在下次使用時重新載入。下載的影片、觀看紀錄和設定會保留。';
+
+  @override
+  String get selectedCacheCleared => '所選快取已清除';
+
+  @override
+  String get selectedCacheClearFailed => '部分快取清除失敗，請重試';
 }
 
 /// The translations for Chinese, as used in Taiwan, using the Han script (`zh_Hant_TW`).
@@ -9614,4 +9713,37 @@ class AppLocalizationsZhHantTw extends AppLocalizationsZh {
 
   @override
   String get popularAnimeUpdateAvailable => '熱門動畫有更新，點擊重新整理';
+
+  @override
+  String get cacheUsageTitle => '快取總大小';
+
+  @override
+  String get imageCacheLabel => '圖片';
+
+  @override
+  String get animeInfoCacheLabel => '條目詳情';
+
+  @override
+  String get cacheSelectAll => '全選';
+
+  @override
+  String get cacheDeselectAll => '取消全選';
+
+  @override
+  String get cacheSelectedSize => '已選快取';
+
+  @override
+  String get clearSelectedCache => '清除所選';
+
+  @override
+  String get clearSelectedCacheTitle => '清除所選快取？';
+
+  @override
+  String get clearSelectedCacheDescription => '快取會在下次使用時重新載入。下載的影片、觀看紀錄和設定會保留。';
+
+  @override
+  String get selectedCacheCleared => '所選快取已清除';
+
+  @override
+  String get selectedCacheClearFailed => '部分快取清除失敗，請重試';
 }

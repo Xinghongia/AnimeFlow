@@ -55,6 +55,8 @@ class AnimeInfoRepository extends _$AnimeInfoRepository {
       await _cacheReady;
       if (cancelToken?.isCancelled ?? false) throw cancelToken!.cancelError!;
       final generation = _generation;
+      final cacheRevision =
+          JsonResponseCache.revisionOf(Storage.animeInfoCache);
       if (!forceRefresh && _cacheReadable) {
         try {
           final cached = _local.read(subjectId, sessionId: sessionId);
@@ -80,7 +82,10 @@ class AnimeInfoRepository extends _$AnimeInfoRepository {
             await _remote.getSubject(subjectId, cancelToken: cancelToken);
         if (cancelToken?.isCancelled ?? false) return;
         if (generation != _generation) continue;
-        await cacheSubject(subject, sessionId: sessionId);
+        if (cacheRevision ==
+            JsonResponseCache.revisionOf(Storage.animeInfoCache)) {
+          await cacheSubject(subject, sessionId: sessionId);
+        }
         if (cancelToken?.isCancelled ?? false) return;
         if (generation != _generation) continue;
         yield subject;
@@ -101,8 +106,12 @@ class AnimeInfoRepository extends _$AnimeInfoRepository {
     required String? sessionId,
   }) async {
     final generation = _generation;
+    final cacheRevision = JsonResponseCache.revisionOf(Storage.animeInfoCache);
     await _cacheReady;
-    if (generation != _generation) return;
+    if (generation != _generation ||
+        cacheRevision != JsonResponseCache.revisionOf(Storage.animeInfoCache)) {
+      return;
+    }
     try {
       await _local.write(subject, sessionId: sessionId);
     } catch (error) {
