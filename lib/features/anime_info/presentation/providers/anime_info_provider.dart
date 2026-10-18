@@ -41,7 +41,7 @@ class AnimeInfo extends _$AnimeInfo {
     final subjectId = ref.watch(animeInfoArgsProvider.select((e) => e.id));
     // 监听收藏和会话变化，使路由传入的旧数据失效，并获取当前用户的最新收藏状态。
     ref.watch(collectionRevisionProvider);
-    final repository = ref.watch(animeInfoRepositoryProvider);
+    final repository = ref.watch(animeInfoRepositoryProvider.notifier);
     final tokenFuture = ref.watch(currentFlowTokenProvider.future);
     final initial = ref.watch(animeInfoInitialProvider);
     final forceRefresh = !ref.isFirstBuild;
@@ -62,7 +62,7 @@ class AnimeInfo extends _$AnimeInfo {
 
   void setAnimeInfo(SubjectsInfoItem subjectInfo) {
     state = AsyncData(subjectInfo);
-    final repository = ref.read(animeInfoRepositoryProvider);
+    final repository = ref.read(animeInfoRepositoryProvider.notifier);
     repository.invalidateCache();
     unawaited(repository.invalidateCommentsCache(subjectInfo.id));
     ref.invalidate(subjectCommentsProvider);
@@ -114,7 +114,7 @@ class SubjectStills extends _$SubjectStills {
   Future<List<String>> build() {
     final subjectId = ref.watch(animeInfoArgsProvider.select((e) => e.id));
     return ref
-        .watch(animeInfoRepositoryProvider)
+        .watch(animeInfoRepositoryProvider.notifier)
         .getStills(subjectId, cancelToken: _requestCancelToken(ref));
   }
 }
@@ -153,13 +153,14 @@ class SubjectComments extends _$SubjectComments {
     _armedForBottomLoad = true;
     _loadMoreScheduled = false;
     _forceRefresh = !ref.isFirstBuild;
-    final comments = await ref.watch(animeInfoRepositoryProvider).getComments(
-          subjectId,
-          limit: _pageSize,
-          offset: 0,
-          cancelToken: _cancelToken,
-          forceRefresh: _forceRefresh,
-        );
+    final comments =
+        await ref.watch(animeInfoRepositoryProvider.notifier).getComments(
+              subjectId,
+              limit: _pageSize,
+              offset: 0,
+              cancelToken: _cancelToken,
+              forceRefresh: _forceRefresh,
+            );
     return SubjectCommentsViewState(
         comments: comments,
         nextOffset: comments.data.length,
@@ -213,13 +214,14 @@ class SubjectComments extends _$SubjectComments {
     try {
       final prev = current.comments;
       final subjectId = ref.read(animeInfoArgsProvider.select((e) => e.id));
-      final result = await ref.read(animeInfoRepositoryProvider).getComments(
-            subjectId,
-            limit: _pageSize,
-            offset: current.nextOffset,
-            cancelToken: cancelToken,
-            forceRefresh: _forceRefresh,
-          );
+      final result =
+          await ref.read(animeInfoRepositoryProvider.notifier).getComments(
+                subjectId,
+                limit: _pageSize,
+                offset: current.nextOffset,
+                cancelToken: cancelToken,
+                forceRefresh: _forceRefresh,
+              );
       if (!ref.mounted || cancelToken.isCancelled) return;
       final merged = SubjectCommentItem(
         data: {
@@ -254,7 +256,7 @@ class SubjectRelated extends _$SubjectRelated {
   @override
   Future<SubjectRelationItem> build() async {
     final subjectId = ref.watch(animeInfoArgsProvider.select((e) => e.id));
-    return ref.watch(animeInfoRepositoryProvider).getRelated(subjectId,
+    return ref.watch(animeInfoRepositoryProvider.notifier).getRelated(subjectId,
         limit: 20,
         offset: 0,
         cancelToken: _requestCancelToken(ref),
@@ -268,7 +270,8 @@ class SubjectCharacters extends _$SubjectCharacters {
   @override
   Future<CharactersItem> build() async {
     final subjectId = ref.watch(animeInfoArgsProvider.select((e) => e.id));
-    return ref.watch(characterRepositoryProvider).getCharacters(subjectId,
+    return ref.watch(characterRepositoryProvider.notifier).getCharacters(
+        subjectId,
         limit: 10,
         offset: 0,
         cancelToken: _requestCancelToken(ref),
@@ -282,7 +285,8 @@ class SubjectProducers extends _$SubjectProducers {
   @override
   Future<ProducersItem> build() async {
     final subjectId = ref.watch(animeInfoArgsProvider.select((e) => e.id));
-    return ref.watch(animeInfoRepositoryProvider).getProducers(subjectId,
+    return ref.watch(animeInfoRepositoryProvider.notifier).getProducers(
+        subjectId,
         limit: 10,
         offset: 0,
         cancelToken: _requestCancelToken(ref),

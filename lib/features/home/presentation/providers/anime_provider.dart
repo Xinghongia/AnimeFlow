@@ -68,7 +68,7 @@ class AnimeHot extends _$AnimeHot {
 
   @override
   Future<AnimeHotState> build() async {
-    final repository = ref.watch(popularAnimeRepositoryProvider);
+    final repository = ref.watch(popularAnimeRepositoryProvider.notifier);
     final token = _startRequest();
     _pendingPage = null;
     final cached = repository.readPage(limit: limit, offset: 0);
@@ -149,8 +149,10 @@ class AnimeHot extends _$AnimeHot {
     );
 
     try {
-      final hotItem = await ref.read(popularAnimeRepositoryProvider).getPage(
-          limit: limit, offset: current.nextOffset, cancelToken: token);
+      final hotItem = await ref
+          .read(popularAnimeRepositoryProvider.notifier)
+          .getPage(
+              limit: limit, offset: current.nextOffset, cancelToken: token);
       if (!ref.mounted || token.isCancelled) return;
       final nextItems = {
         for (final item in current.items) item.subject.id: item,
@@ -181,7 +183,7 @@ class AnimeHot extends _$AnimeHot {
       applyUpdate();
       return;
     }
-    final repository = ref.read(popularAnimeRepositoryProvider);
+    final repository = ref.read(popularAnimeRepositoryProvider.notifier);
     final token = _startRequest();
     final current = state.asData?.value;
     state = current == null

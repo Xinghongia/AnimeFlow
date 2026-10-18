@@ -42,7 +42,7 @@ class CharactersList extends _$CharactersList {
     _autoFillScheduled = false;
     _forceRefresh = !ref.isFirstBuild;
     final characters =
-        await ref.watch(characterRepositoryProvider).getCharacters(
+        await ref.watch(characterRepositoryProvider.notifier).getCharacters(
               subjectId,
               limit: _pageSize,
               offset: 0,
@@ -113,13 +113,14 @@ class CharactersList extends _$CharactersList {
     try {
       final prev = current.characters;
       final subjectId = ref.read(charactersArgsProvider);
-      final result = await ref.read(characterRepositoryProvider).getCharacters(
-            subjectId,
-            limit: _pageSize,
-            offset: prev.data.length,
-            cancelToken: token,
-            forceRefresh: _forceRefresh,
-          );
+      final result =
+          await ref.read(characterRepositoryProvider.notifier).getCharacters(
+                subjectId,
+                limit: _pageSize,
+                offset: prev.data.length,
+                cancelToken: token,
+                forceRefresh: _forceRefresh,
+              );
       if (!ref.mounted || token.isCancelled) return;
       final merged = CharactersItem(
         data: [...prev.data, ...result.data],

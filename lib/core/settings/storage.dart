@@ -17,6 +17,7 @@ class Storage {
   static late final Box<String> subjectMetadataCache;
   static late final Box<String> subjectCommentsCache;
   static late final Box<String> popularAnimeCache;
+  static late final Box<String> calendarCache;
 
   static Future<void> init() async {
     Hive.registerAdapters();
@@ -38,6 +39,8 @@ class Storage {
         await _openBoxWithFallback<String>(StorageKey.subjectCommentsCacheKey);
     popularAnimeCache =
         await _openBoxWithFallback<String>(StorageKey.popularAnimeCacheKey);
+    calendarCache =
+        await _openBoxWithFallback<String>(StorageKey.calendarCacheKey);
   }
 
   static Future<Box<CrawlConfigItem>> _openCrawlConfigs() async {

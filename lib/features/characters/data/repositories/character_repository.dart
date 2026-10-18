@@ -11,11 +11,12 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'character_repository.g.dart';
 
-@Riverpod(keepAlive: true)
-CharacterRepository characterRepository(Ref ref) => CharacterRepository();
-
 /// 角色公开资料
-class CharacterRepository {
+@Riverpod(keepAlive: true)
+class CharacterRepository extends _$CharacterRepository {
+  @override
+  void build() {}
+
   Future<CharactersItem> getCharacters(
     int subjectId, {
     required int limit,

@@ -423,9 +423,11 @@ class FlowApi {
   }
 
   ///每日放送
-  static Future<Calendar> calendarService({int? year, int? month}) async {
+  static Future<Calendar> calendarService(
+      {int? year, int? month, CancelToken? cancelToken}) async {
     return await _client.get(
       AnimeFlowApi.calendar,
+      cancelToken: cancelToken,
       queryParameters: {
         if (year != null) 'year': year,
         if (month != null) 'month': month,

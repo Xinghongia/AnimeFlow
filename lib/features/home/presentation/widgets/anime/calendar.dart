@@ -19,7 +19,7 @@ class CalendarView extends StatefulWidget {
 
 class _CalendarViewState extends State<CalendarView> {
   final ScrollController _scrollController = ScrollController();
-  final weekday = DateTime.now().weekday;
+  int get weekday => DateTime.now().weekday;
   bool _isHovering = false;
   bool _canScrollLeft = false;
   bool _canScrollRight = false;

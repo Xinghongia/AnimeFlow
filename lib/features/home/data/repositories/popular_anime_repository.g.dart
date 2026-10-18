@@ -9,13 +9,11 @@ part of 'popular_anime_repository.dart';
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
 
-@ProviderFor(popularAnimeRepository)
+@ProviderFor(PopularAnimeRepository)
 final popularAnimeRepositoryProvider = PopularAnimeRepositoryProvider._();
 
-final class PopularAnimeRepositoryProvider extends $FunctionalProvider<
-    PopularAnimeRepository,
-    PopularAnimeRepository,
-    PopularAnimeRepository> with $Provider<PopularAnimeRepository> {
+final class PopularAnimeRepositoryProvider
+    extends $NotifierProvider<PopularAnimeRepository, void> {
   PopularAnimeRepositoryProvider._()
       : super(
           from: null,
@@ -32,23 +30,28 @@ final class PopularAnimeRepositoryProvider extends $FunctionalProvider<
 
   @$internal
   @override
-  $ProviderElement<PopularAnimeRepository> $createElement(
-          $ProviderPointer pointer) =>
-      $ProviderElement(pointer);
-
-  @override
-  PopularAnimeRepository create(Ref ref) {
-    return popularAnimeRepository(ref);
-  }
+  PopularAnimeRepository create() => PopularAnimeRepository();
 
   /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(PopularAnimeRepository value) {
+  Override overrideWithValue(void value) {
     return $ProviderOverride(
       origin: this,
-      providerOverride: $SyncValueProvider<PopularAnimeRepository>(value),
+      providerOverride: $SyncValueProvider<void>(value),
     );
   }
 }
 
 String _$popularAnimeRepositoryHash() =>
-    r'6f2bcb4816f1d98cbf1d2ba85a828236a4538156';
+    r'c7f2ee8286a970634d7bd51da3c1cecfd29fad0c';
+
+abstract class _$PopularAnimeRepository extends $Notifier<void> {
+  void build();
+  @$mustCallSuper
+  @override
+  void runBuild() {
+    final ref = this.ref as $Ref<void, void>;
+    final element = ref.element as $ClassProviderElement<
+        AnyNotifier<void, void>, void, Object?, Object?>;
+    element.handleCreate(ref, build);
+  }
+}

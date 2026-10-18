@@ -75,6 +75,14 @@ void main() {
   late Directory directory;
   late Adapter adapter;
   late CharacterRepository repository;
+  late ProviderContainer repositoryContainer;
+
+  CharacterRepository createRepository() {
+    repositoryContainer = ProviderContainer(retry: (_, __) => null);
+    addTearDown(repositoryContainer.dispose);
+    return repositoryContainer.read(characterRepositoryProvider.notifier);
+  }
+
   final charactersJson = jsonDecode(
       File('test/shared/models/fixtures/subject_characters.json')
           .readAsStringSync()) as Map<String, dynamic>;
@@ -91,7 +99,7 @@ void main() {
   });
   setUp(() async {
     await Storage.characterDataCache.clear();
-    repository = CharacterRepository();
+    repository = createRepository();
     adapter = Adapter()..respond = (_) => reply(charactersJson);
     DioFactory.animeFlowDio.interceptors.clear();
     DioFactory.animeFlowDio.httpClientAdapter = adapter;
@@ -127,7 +135,7 @@ void main() {
     expect(list.characters.toJson(), charactersJson);
     expect(adapter.requests, hasLength(1));
     final cached =
-        await CharacterRepository().getCharacters(42, limit: 10, offset: 0);
+        await createRepository().getCharacters(42, limit: 10, offset: 0);
     expect(cached.toJson(), charactersJson);
     expect(adapter.requests, hasLength(1));
     await c.read(charactersListProvider.notifier).loadMore();
@@ -221,7 +229,7 @@ void main() {
     ]) {
       await repository.getWorks(args.id,
           limit: args.limit, offset: args.offset, subjectType: args.type);
-      final cached = await CharacterRepository().getWorks(args.id,
+      final cached = await createRepository().getWorks(args.id,
           limit: args.limit, offset: args.offset, subjectType: args.type);
       expect(cached.toJson(), works);
     }

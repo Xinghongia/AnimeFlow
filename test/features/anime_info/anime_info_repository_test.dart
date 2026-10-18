@@ -12,6 +12,7 @@ import 'package:anime_flow/core/settings/storage.dart';
 import 'package:anime_flow/features/anime_info/data/datasources/anime_info_local_data_source.dart';
 import 'package:anime_flow/features/anime_info/data/repositories/anime_info_repository.dart';
 import 'package:anime_flow/features/anime_info/presentation/providers/anime_info_provider.dart';
+import 'package:anime_flow/features/user/application/collection_revision_provider.dart';
 import 'package:anime_flow/features/user/presentation/providers/user_state_provider.dart';
 import 'package:anime_flow/shared/models/bangumi/subjects_info_item.dart';
 import 'package:dio/dio.dart';
@@ -89,6 +90,13 @@ void main() {
   final local = AnimeInfoLocalDataSource();
   late PendingAdapter remote;
   late AnimeInfoRepository repository;
+  late ProviderContainer repositoryContainer;
+
+  AnimeInfoRepository createRepository() {
+    repositoryContainer = ProviderContainer(retry: (_, __) => null);
+    addTearDown(repositoryContainer.dispose);
+    return repositoryContainer.read(animeInfoRepositoryProvider.notifier);
+  }
 
   setUpAll(() async {
     FlutterSecureStorage.setMockInitialValues({});
@@ -105,7 +113,7 @@ void main() {
     remote = PendingAdapter();
     DioFactory.animeFlowDio.interceptors.clear();
     DioFactory.animeFlowDio.httpClientAdapter = remote;
-    repository = AnimeInfoRepository();
+    repository = createRepository();
   });
   tearDown(() {
     DioFactory.animeFlowDio.close(force: true);
@@ -113,12 +121,14 @@ void main() {
   });
 
   ProviderContainer createContainer() {
-    final container = ProviderContainer(retry: (_, __) => null, overrides: [
-      currentFlowTokenProvider.overrideWith(GuestToken.new),
-      animeInfoArgsProvider
-          .overrideWithValue(InfoRouteExtra(id: 42, name: '', image: '')),
-      animeInfoRepositoryProvider.overrideWithValue(repository),
-    ]);
+    final container = ProviderContainer(
+        parent: repositoryContainer,
+        retry: (_, __) => null,
+        overrides: [
+          currentFlowTokenProvider.overrideWith(GuestToken.new),
+          animeInfoArgsProvider
+              .overrideWithValue(InfoRouteExtra(id: 42, name: '', image: '')),
+        ]);
     addTearDown(container.dispose);
     container.listen(animeInfoProvider, (_, __) {});
     return container;
@@ -131,7 +141,7 @@ void main() {
     await pumpEventQueue();
     expect(remote.requests, hasLength(1));
 
-    repository.invalidateCache();
+    repositoryContainer.read(collectionRevisionProvider.notifier).changed();
     remote.requests[0].complete(reply(subject: subject('stale')));
     await pumpEventQueue();
     expect(remote.requests, hasLength(2));

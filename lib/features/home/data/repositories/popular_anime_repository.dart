@@ -9,10 +9,10 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 part 'popular_anime_repository.g.dart';
 
 @Riverpod(keepAlive: true)
-PopularAnimeRepository popularAnimeRepository(Ref ref) =>
-    PopularAnimeRepository();
+class PopularAnimeRepository extends _$PopularAnimeRepository {
+  @override
+  void build() {}
 
-class PopularAnimeRepository {
   int _generation = 0;
   Future<void> _cacheReady = Future.value();
 

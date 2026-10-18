@@ -24,7 +24,7 @@ typedef CollectionPageLoader = Future<UserCollectionsItem> Function({
 });
 
 final collectionCancelProvider = Provider<Future<void> Function(int)>((ref) {
-  final repository = ref.watch(animeInfoRepositoryProvider);
+  final repository = ref.watch(animeInfoRepositoryProvider.notifier);
   return (subjectId) async {
     await FlowApi.cancelCollectionService(subjectId);
     repository.invalidateCache();
@@ -45,7 +45,7 @@ final collectionPageLoaderProvider = Provider<CollectionPageLoader>((ref) {
 final collectionTypeUpdateProvider =
     Provider<Future<CollectionUpdateResult> Function(UserCollectionData, int)>(
         (ref) {
-  final repository = ref.watch(animeInfoRepositoryProvider);
+  final repository = ref.watch(animeInfoRepositoryProvider.notifier);
   return (collection, newType) async {
     final result = await FlowApi.updateCollectionService(
       collection.id,

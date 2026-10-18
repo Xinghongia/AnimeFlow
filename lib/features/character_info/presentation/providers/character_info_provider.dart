@@ -22,8 +22,10 @@ class CharacterInfoDetail extends _$CharacterInfoDetail {
   Future<CharacterDetailItem> build() async {
     final characterId =
         ref.watch(characterInfoArgsProvider.select((e) => e.characterId));
-    return ref.watch(characterRepositoryProvider).getDetail(characterId,
-        cancelToken: _requestCancelToken(ref), forceRefresh: !ref.isFirstBuild);
+    return ref.watch(characterRepositoryProvider.notifier).getDetail(
+        characterId,
+        cancelToken: _requestCancelToken(ref),
+        forceRefresh: !ref.isFirstBuild);
   }
 }
 
@@ -33,7 +35,7 @@ class CharacterWorks extends _$CharacterWorks {
   Future<CharacterCastsItem> build() async {
     final characterId =
         ref.watch(characterInfoArgsProvider.select((e) => e.characterId));
-    return ref.watch(characterRepositoryProvider).getWorks(
+    return ref.watch(characterRepositoryProvider.notifier).getWorks(
           characterId,
           limit: 20,
           offset: 0,

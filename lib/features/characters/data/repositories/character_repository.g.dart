@@ -8,14 +8,15 @@ part of 'character_repository.dart';
 
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
+/// 角色公开资料
 
-@ProviderFor(characterRepository)
+@ProviderFor(CharacterRepository)
 final characterRepositoryProvider = CharacterRepositoryProvider._();
 
-final class CharacterRepositoryProvider extends $FunctionalProvider<
-    CharacterRepository,
-    CharacterRepository,
-    CharacterRepository> with $Provider<CharacterRepository> {
+/// 角色公开资料
+final class CharacterRepositoryProvider
+    extends $NotifierProvider<CharacterRepository, void> {
+  /// 角色公开资料
   CharacterRepositoryProvider._()
       : super(
           from: null,
@@ -32,23 +33,30 @@ final class CharacterRepositoryProvider extends $FunctionalProvider<
 
   @$internal
   @override
-  $ProviderElement<CharacterRepository> $createElement(
-          $ProviderPointer pointer) =>
-      $ProviderElement(pointer);
-
-  @override
-  CharacterRepository create(Ref ref) {
-    return characterRepository(ref);
-  }
+  CharacterRepository create() => CharacterRepository();
 
   /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(CharacterRepository value) {
+  Override overrideWithValue(void value) {
     return $ProviderOverride(
       origin: this,
-      providerOverride: $SyncValueProvider<CharacterRepository>(value),
+      providerOverride: $SyncValueProvider<void>(value),
     );
   }
 }
 
 String _$characterRepositoryHash() =>
-    r'6b1ecfb8ee732f89dad5601322862134b3a6c5bd';
+    r'43d42203f521c15e7db5d5c28e5f659ca6ba7cf9';
+
+/// 角色公开资料
+
+abstract class _$CharacterRepository extends $Notifier<void> {
+  void build();
+  @$mustCallSuper
+  @override
+  void runBuild() {
+    final ref = this.ref as $Ref<void, void>;
+    final element = ref.element as $ClassProviderElement<
+        AnyNotifier<void, void>, void, Object?, Object?>;
+    element.handleCreate(ref, build);
+  }
+}

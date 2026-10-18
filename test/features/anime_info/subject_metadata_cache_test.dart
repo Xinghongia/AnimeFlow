@@ -115,6 +115,13 @@ void main() {
   late Directory directory;
   late Adapter adapter;
   late AnimeInfoRepository repository;
+  late ProviderContainer repositoryContainer;
+
+  AnimeInfoRepository createRepository() {
+    repositoryContainer = ProviderContainer(retry: (_, __) => null);
+    addTearDown(repositoryContainer.dispose);
+    return repositoryContainer.read(animeInfoRepositoryProvider.notifier);
+  }
 
   setUpAll(() async {
     FlutterSecureStorage.setMockInitialValues({});
@@ -129,7 +136,7 @@ void main() {
   });
   setUp(() async {
     await Storage.subjectMetadataCache.clear();
-    repository = AnimeInfoRepository();
+    repository = createRepository();
     adapter = Adapter()
       ..respond = (options) =>
           reply(options.path.endsWith('/staffs/persons') ? producers : related);
@@ -181,7 +188,7 @@ void main() {
     test('$kind persists all fields and survives collection invalidation',
         () async {
       expect(await load(kind), fixture);
-      repository = AnimeInfoRepository();
+      repository = createRepository();
       repository.invalidateCache();
       expect(await load(kind), fixture);
       expect(adapter.requests, hasLength(1));

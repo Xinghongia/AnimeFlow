@@ -12,6 +12,7 @@ class StorageKey {
       subjectMetadataCacheKey = 'subject_metadata_cache_v1',
       subjectCommentsCacheKey = 'subject_comments_cache_v1',
       popularAnimeCacheKey = 'popular_anime_cache_v1',
+      calendarCacheKey = 'calendar_cache_v1',
       autoUpdateKey = 'auto_update_key',
       searchHistoryKey = 'search_history_key';
 }

@@ -73,6 +73,13 @@ void main() {
   late Directory directory;
   late Adapter adapter;
   late PopularAnimeRepository repository;
+  late ProviderContainer repositoryContainer;
+
+  PopularAnimeRepository createRepository() {
+    repositoryContainer = ProviderContainer(retry: (_, __) => null);
+    addTearDown(repositoryContainer.dispose);
+    return repositoryContainer.read(popularAnimeRepositoryProvider.notifier);
+  }
 
   setUpAll(() async {
     FlutterSecureStorage.setMockInitialValues({});
@@ -86,7 +93,7 @@ void main() {
   });
   setUp(() async {
     await Storage.popularAnimeCache.clear();
-    repository = PopularAnimeRepository();
+    repository = createRepository();
     adapter = Adapter()
       ..respond = (options) {
         final offset = options.queryParameters['offset'] as int;
@@ -102,9 +109,7 @@ void main() {
   });
 
   ProviderContainer container() {
-    final c = ProviderContainer(retry: (_, __) => null, overrides: [
-      popularAnimeRepositoryProvider.overrideWithValue(repository),
-    ]);
+    final c = ProviderContainer(retry: (_, __) => null);
     addTearDown(c.dispose);
     c.listen(animeHotProvider, (_, __) {});
     return c;
@@ -245,9 +250,7 @@ void main() {
       started.complete();
       return pending.future;
     };
-    final c = ProviderContainer(overrides: [
-      popularAnimeRepositoryProvider.overrideWithValue(repository),
-    ]);
+    final c = ProviderContainer(retry: (_, __) => null);
     addTearDown(c.dispose);
     final subscription = c.listen(animeHotProvider, (_, __) {});
     await c.read(animeHotProvider.future);
@@ -266,7 +269,7 @@ void main() {
     await first.read(animeHotProvider.future);
     await first.read(animeHotProvider.notifier).loadMore();
     expect(adapter.requests, hasLength(2));
-    repository = PopularAnimeRepository();
+    repository = createRepository();
     final reopened = container();
     await reopened.read(animeHotProvider.future);
     await reopened.read(animeHotProvider.notifier).loadMore();

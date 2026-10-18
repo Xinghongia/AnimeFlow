@@ -37,7 +37,7 @@ final class CharactersListProvider
   CharactersList create() => CharactersList();
 }
 
-String _$charactersListHash() => r'f323153cd348354a2bef1df6c0221f6b50b0e421';
+String _$charactersListHash() => r'32147d9a8aa0420617916f99cee373ec8924c055';
 
 abstract class _$CharactersList extends $AsyncNotifier<CharactersViewState> {
   FutureOr<CharactersViewState> build();

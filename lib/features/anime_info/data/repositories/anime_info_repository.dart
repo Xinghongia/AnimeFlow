@@ -16,14 +16,12 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 part 'anime_info_repository.g.dart';
 
 @Riverpod(keepAlive: true)
-AnimeInfoRepository animeInfoRepository(Ref ref) {
-  final repository = AnimeInfoRepository();
-  ref.listen(
-      collectionRevisionProvider, (_, __) => repository.invalidateCache());
-  return repository;
-}
+class AnimeInfoRepository extends _$AnimeInfoRepository {
+  @override
+  void build() {
+    ref.listen(collectionRevisionProvider, (_, __) => invalidateCache());
+  }
 
-class AnimeInfoRepository {
   final _local = AnimeInfoLocalDataSource();
   final _remote = AnimeInfoRemoteDataSource();
   Future<void> _cacheReady = Future.value();

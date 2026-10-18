@@ -69,6 +69,14 @@ void main() {
   late Directory directory;
   late Adapter adapter;
   late AnimeInfoRepository repository;
+  late ProviderContainer repositoryContainer;
+
+  AnimeInfoRepository createRepository() {
+    repositoryContainer = ProviderContainer(retry: (_, __) => null);
+    addTearDown(repositoryContainer.dispose);
+    return repositoryContainer.read(animeInfoRepositoryProvider.notifier);
+  }
+
   setUpAll(() async {
     FlutterSecureStorage.setMockInitialValues({});
     directory = await Directory.systemTemp.createTemp('comments_cache_test_');
@@ -81,7 +89,7 @@ void main() {
   });
   setUp(() async {
     await Storage.subjectCommentsCache.clear();
-    repository = AnimeInfoRepository();
+    repository = createRepository();
     adapter = Adapter()
       ..respond =
           (options) => reply(page([options.queryParameters['offset'] as int]));
@@ -94,11 +102,13 @@ void main() {
   });
 
   ProviderContainer container() {
-    final c = ProviderContainer(retry: (_, __) => null, overrides: [
-      animeInfoRepositoryProvider.overrideWithValue(repository),
-      animeInfoArgsProvider
-          .overrideWithValue(InfoRouteExtra(id: 42, name: '', image: '')),
-    ]);
+    final c = ProviderContainer(
+        parent: repositoryContainer,
+        retry: (_, __) => null,
+        overrides: [
+          animeInfoArgsProvider
+              .overrideWithValue(InfoRouteExtra(id: 42, name: '', image: '')),
+        ]);
     addTearDown(c.dispose);
     c.listen(subjectCommentsProvider, (_, __) {});
     return c;
@@ -115,7 +125,7 @@ void main() {
     expect((await repository.getComments(42, limit: 20, offset: 0)).toJson(),
         page([0]));
     await agePage('42:20:0', const Duration(minutes: 59));
-    await AnimeInfoRepository().getComments(42, limit: 20, offset: 0);
+    await createRepository().getComments(42, limit: 20, offset: 0);
     expect(adapter.requests, hasLength(1));
     await agePage('42:20:0', const Duration(minutes: 61));
     adapter.respond = (_) => reply(page([100]));
