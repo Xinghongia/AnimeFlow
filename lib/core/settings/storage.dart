@@ -12,6 +12,7 @@ class Storage {
   static late final Box<PlayHistory> playHistory;
   static late final Box<SearchHistory> searchHistory;
   static late final Box<DownloadRecord> downloads;
+  static late final Box<String> animeInfoCache;
 
   static Future<void> init() async {
     Hive.registerAdapters();
@@ -23,6 +24,8 @@ class Storage {
         await _openBoxWithFallback<SearchHistory>(StorageKey.searchHistoryKey);
     downloads =
         await _openBoxWithFallback<DownloadRecord>(StorageKey.downloadsKey);
+    animeInfoCache =
+        await _openBoxWithFallback<String>(StorageKey.animeInfoCacheKey);
   }
 
   static Future<Box<CrawlConfigItem>> _openCrawlConfigs() async {
