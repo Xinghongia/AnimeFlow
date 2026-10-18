@@ -1,12 +1,22 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:anime_flow/app/router/model/play_route_extra.dart';
 import 'package:anime_flow/app/router/routes_args.dart';
+import 'package:anime_flow/core/auth/models/flow_token.dart';
+import 'package:anime_flow/core/settings/storage.dart';
 import 'package:anime_flow/features/play/presentation/providers/episodes_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/subject_episodes_provider.dart';
+import 'package:anime_flow/features/user/presentation/providers/user_state_provider.dart';
 import 'package:anime_flow/shared/models/player/bangumi/episodes_item.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:hive_ce/hive.dart';
+
+class _GuestToken extends CurrentFlowToken {
+  @override
+  Future<FlowToken?> build() async => null;
+}
 
 class _Request {
   _Request(this.offset);
@@ -16,11 +26,13 @@ class _Request {
 
 class _Episodes extends SubjectEpisodes {
   final requests = <_Request>[];
+  final firstRequest = Completer<void>();
 
   @override
   Future<EpisodesItem> fetchPage(int subjectId, {required int offset}) {
     final request = _Request(offset);
     requests.add(request);
+    if (!firstRequest.isCompleted) firstRequest.complete();
     return request.result.future;
   }
 }
@@ -47,15 +59,29 @@ EpisodesItem _page(List<int> ids, int total) => EpisodesItem(
 Future<void> _flush() => Future<void>.delayed(Duration.zero);
 
 void main() {
+  late Directory directory;
   late ProviderContainer container;
   late _Episodes notifier;
   final provider = subjectEpisodesProvider(1);
-  setUp(() {
+  setUpAll(() async {
+    directory = await Directory.systemTemp.createTemp('subject_episodes_test_');
+    Hive.init(directory.path);
+    Storage.subjectEpisodesCache = await Hive.openBox<String>('episodes');
+  });
+  tearDownAll(() async {
+    await Hive.close();
+    await directory.delete(recursive: true);
+  });
+  setUp(() async {
+    await Storage.subjectEpisodesCache.clear();
     notifier = _Episodes();
     container = ProviderContainer(retry: (_, error) => null, overrides: [
+      currentFlowTokenProvider.overrideWith(_GuestToken.new),
       provider.overrideWith(() => notifier),
     ]);
     container.listen(provider, (_, next) {});
+    // Loading now awaits the session and cache lookup before requesting a page.
+    await notifier.firstRequest.future;
   });
   tearDown(() => container.dispose());
 
@@ -175,6 +201,7 @@ void main() {
       () async {
     final source = _Episodes();
     final player = ProviderContainer(overrides: [
+      currentFlowTokenProvider.overrideWith(_GuestToken.new),
       provider.overrideWith(() => source),
       playExtraProvider.overrideWithValue(const PlayRouteExtra(
         playExtra: PlayExtra(
@@ -189,6 +216,7 @@ void main() {
     addTearDown(player.dispose);
     player.listen(episodesProvider, (_, next) {});
     final selected = player.read(episodesProvider.future);
+    await source.firstRequest.future;
     source.requests[0].result.complete(_page([1], 2));
     await _flush();
     source.requests[1].result.complete(_page([2], 2));

@@ -12,7 +12,7 @@ EpisodeData _episode(int id, {num sort = 1, int type = 0, bool? watched}) {
     name: 'ep$id',
     nameCN: '',
     duration: '',
-    airdate: '',
+    airdate: '2000-01-01',
     comment: 0,
     desc: '',
     watched: watched,

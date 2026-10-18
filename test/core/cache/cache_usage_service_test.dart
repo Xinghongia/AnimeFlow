@@ -21,6 +21,7 @@ void main() {
     Storage.subjectCommentsCache = await Hive.openBox<String>('comments');
     Storage.popularAnimeCache = await Hive.openBox<String>('popular');
     Storage.calendarCache = await Hive.openBox<String>('calendar');
+    Storage.subjectEpisodesCache = await Hive.openBox<String>('episodes');
     boxes = {
       CacheCategory.animeInfo: Storage.animeInfoCache,
       CacheCategory.characters: Storage.characterDataCache,
@@ -28,6 +29,7 @@ void main() {
       CacheCategory.subjectComments: Storage.subjectCommentsCache,
       CacheCategory.popularAnime: Storage.popularAnimeCache,
       CacheCategory.calendar: Storage.calendarCache,
+      CacheCategory.subjectEpisodes: Storage.subjectEpisodesCache,
     };
   });
   tearDownAll(() async {
@@ -67,7 +69,7 @@ void main() {
     }
     final usage = CacheUsage({CacheCategory.images: 1024, ...sizes});
     expect(usage.totalBytes, expectedTotal);
-    expect(usage.sizes, hasLength(7));
+    expect(usage.sizes.keys, unorderedEquals(CacheCategory.values));
     expect(other.get('account'), 'personal data' * 10000);
   });
 
@@ -95,12 +97,14 @@ void main() {
     }
     final settings = await Hive.openBox<String>('settings');
     await settings.put('keep', 'settings');
-    await service.clearData({CacheCategory.characters, CacheCategory.calendar});
+    final selected = {
+      CacheCategory.characters,
+      CacheCategory.calendar,
+      CacheCategory.subjectEpisodes,
+    };
+    await service.clearData(selected);
     for (final entry in boxes.entries) {
-      expect(
-          entry.value.isEmpty,
-          {CacheCategory.characters, CacheCategory.calendar}
-              .contains(entry.key));
+      expect(entry.value.isEmpty, selected.contains(entry.key));
       expect(entry.value.isOpen, isTrue);
     }
     expect(settings.get('keep'), 'settings');
