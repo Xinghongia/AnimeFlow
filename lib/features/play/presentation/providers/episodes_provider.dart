@@ -75,7 +75,6 @@ class EpisodesData {
   }
 }
 
-/// 当路由参数变化（切换到不同番剧）时自动重新加载剧集。
 @Riverpod(dependencies: [playExtra])
 class Episodes extends _$Episodes {
   int? _selectedSubjectId;
