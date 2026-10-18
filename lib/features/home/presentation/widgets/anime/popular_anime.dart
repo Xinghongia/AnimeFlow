@@ -3,7 +3,7 @@ import 'package:anime_flow/app/router/model/info_route_extra.dart';
 import 'package:anime_flow/features/home/presentation/providers/anime_provider.dart';
 import 'package:anime_flow/app/router/app_router.dart';
 import 'package:anime_flow/shared/widgets/subject_card.dart';
-import 'package:anime_flow/shared/widgets/subject_card_skeleton.dart';
+import 'package:anime_flow/shared/widgets/card_skeleton.dart';
 import 'package:anime_flow/shared/widgets/no_more_indicator.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -26,7 +26,7 @@ class PopularAnimeView extends ConsumerWidget {
           _buildGrid(
             SliverChildBuilderDelegate(
               (BuildContext context, int index) => const Center(
-                child: SubjectCardSkeleton(),
+                child: CardSkeleton(),
               ),
               childCount: _initialSkeletonCount,
             ),
@@ -69,7 +69,7 @@ class PopularAnimeView extends ConsumerWidget {
                   return const Center(
                     child: Padding(
                       padding: EdgeInsets.all(2),
-                      child: SubjectCardSkeleton(),
+                      child: CardSkeleton(),
                     ),
                   );
                 }
