@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:anime_flow/features/anime_info/data/repositories/anime_info_repository_provider.dart';
+import 'package:anime_flow/features/characters/data/repositories/character_repository_provider.dart';
 import 'package:anime_flow/features/user/application/collection_revision_provider.dart';
 import 'package:anime_flow/shared/models/flow/collection_update_result.dart';
 import 'package:anime_flow/shared/models/bangumi/actor_item.dart';
@@ -63,6 +64,8 @@ class AnimeInfo extends _$AnimeInfo {
     state = AsyncData(subjectInfo);
     final repository = ref.read(animeInfoRepositoryProvider);
     repository.invalidateCache();
+    unawaited(repository.invalidateCommentsCache(subjectInfo.id));
+    ref.invalidate(subjectCommentsProvider);
     unawaited(repository.cacheSubject(subjectInfo,
         sessionId: ref.read(currentFlowTokenProvider).value?.sessionId));
   }
@@ -120,13 +123,17 @@ class SubjectStills extends _$SubjectStills {
 class SubjectCommentsViewState {
   const SubjectCommentsViewState({
     required this.comments,
+    this.nextOffset = 0,
+    this.hasNextPage = true,
     this.isLoadingMore = false,
   });
 
   final SubjectCommentItem comments;
+  final int nextOffset;
+  final bool hasNextPage;
   final bool isLoadingMore;
 
-  bool get hasMore => comments.data.length < comments.total;
+  bool get hasMore => hasNextPage && nextOffset < comments.total;
 }
 
 @Riverpod(dependencies: [animeInfoArgs])
@@ -137,6 +144,7 @@ class SubjectComments extends _$SubjectComments {
   bool _armedForBottomLoad = true;
   bool _loadMoreScheduled = false;
   late CancelToken _cancelToken;
+  bool _forceRefresh = false;
 
   @override
   Future<SubjectCommentsViewState> build() async {
@@ -144,13 +152,18 @@ class SubjectComments extends _$SubjectComments {
     _cancelToken = _requestCancelToken(ref);
     _armedForBottomLoad = true;
     _loadMoreScheduled = false;
+    _forceRefresh = !ref.isFirstBuild;
     final comments = await ref.watch(animeInfoRepositoryProvider).getComments(
           subjectId,
           limit: _pageSize,
           offset: 0,
           cancelToken: _cancelToken,
+          forceRefresh: _forceRefresh,
         );
-    return SubjectCommentsViewState(comments: comments);
+    return SubjectCommentsViewState(
+        comments: comments,
+        nextOffset: comments.data.length,
+        hasNextPage: comments.data.isNotEmpty);
   }
 
   /// 滚动接近底部时加载更多：离开底部后重新武装，触底仅触发一次（postFrame 延后）。
@@ -191,6 +204,8 @@ class SubjectComments extends _$SubjectComments {
     state = AsyncData(
       SubjectCommentsViewState(
         comments: current.comments,
+        nextOffset: current.nextOffset,
+        hasNextPage: current.hasNextPage,
         isLoadingMore: true,
       ),
     );
@@ -201,21 +216,31 @@ class SubjectComments extends _$SubjectComments {
       final result = await ref.read(animeInfoRepositoryProvider).getComments(
             subjectId,
             limit: _pageSize,
-            offset: prev.data.length,
+            offset: current.nextOffset,
             cancelToken: cancelToken,
+            forceRefresh: _forceRefresh,
           );
       if (!ref.mounted || cancelToken.isCancelled) return;
       final merged = SubjectCommentItem(
-        data: [...prev.data, ...result.data],
+        data: {
+          for (final comment in prev.data) comment.id: comment,
+          for (final comment in result.data) comment.id: comment,
+        }.values.toList(),
         total: result.total,
       );
-      state = AsyncData(SubjectCommentsViewState(comments: merged));
+      state = AsyncData(SubjectCommentsViewState(
+        comments: merged,
+        nextOffset: current.nextOffset + result.data.length,
+        hasNextPage: result.data.isNotEmpty,
+      ));
     } catch (_) {
       if (!ref.mounted || cancelToken.isCancelled) return;
       _armedForBottomLoad = true;
       state = AsyncData(
         SubjectCommentsViewState(
           comments: current.comments,
+          nextOffset: current.nextOffset,
+          hasNextPage: current.hasNextPage,
           isLoadingMore: false,
         ),
       );
@@ -230,7 +255,10 @@ class SubjectRelated extends _$SubjectRelated {
   Future<SubjectRelationItem> build() async {
     final subjectId = ref.watch(animeInfoArgsProvider.select((e) => e.id));
     return ref.watch(animeInfoRepositoryProvider).getRelated(subjectId,
-        limit: 20, offset: 0, cancelToken: _requestCancelToken(ref));
+        limit: 20,
+        offset: 0,
+        cancelToken: _requestCancelToken(ref),
+        forceRefresh: !ref.isFirstBuild);
   }
 }
 
@@ -240,8 +268,11 @@ class SubjectCharacters extends _$SubjectCharacters {
   @override
   Future<CharactersItem> build() async {
     final subjectId = ref.watch(animeInfoArgsProvider.select((e) => e.id));
-    return ref.watch(animeInfoRepositoryProvider).getCharacters(subjectId,
-        limit: 10, offset: 0, cancelToken: _requestCancelToken(ref));
+    return ref.watch(characterRepositoryProvider).getCharacters(subjectId,
+        limit: 10,
+        offset: 0,
+        cancelToken: _requestCancelToken(ref),
+        forceRefresh: !ref.isFirstBuild);
   }
 }
 
@@ -252,6 +283,9 @@ class SubjectProducers extends _$SubjectProducers {
   Future<ProducersItem> build() async {
     final subjectId = ref.watch(animeInfoArgsProvider.select((e) => e.id));
     return ref.watch(animeInfoRepositoryProvider).getProducers(subjectId,
-        limit: 10, offset: 0, cancelToken: _requestCancelToken(ref));
+        limit: 10,
+        offset: 0,
+        cancelToken: _requestCancelToken(ref),
+        forceRefresh: !ref.isFirstBuild);
   }
 }

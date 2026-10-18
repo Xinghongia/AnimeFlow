@@ -629,19 +629,25 @@ class FlowApi {
   }
 
   ///角色信息
-  static Future<CharacterDetailItem> characterInfoService(
-      int characterId) async {
-    final response = await _client.get(AnimeFlowApi.character
-        .replaceFirst('{characterId}', characterId.toString()));
+  static Future<CharacterDetailItem> characterInfoService(int characterId,
+      {CancelToken? cancelToken}) async {
+    final response = await _client.get(
+        AnimeFlowApi.character
+            .replaceFirst('{characterId}', characterId.toString()),
+        cancelToken: cancelToken);
     return CharacterDetailItem.fromJson(response.data);
   }
 
   ///角色出演作品
   static Future<CharacterCastsItem> characterWorksService(int characterId,
-      {required int limit, required int offset, int subjectType = 2}) async {
+      {required int limit,
+      required int offset,
+      int subjectType = 2,
+      CancelToken? cancelToken}) async {
     final response = await _client.get(
         AnimeFlowApi.characterCasts
             .replaceFirst('{characterId}', characterId.toString()),
+        cancelToken: cancelToken,
         queryParameters: {
           'subjectType': subjectType,
           'limit': limit,

@@ -1,5 +1,4 @@
 import 'package:anime_flow/core/network/api/flow_api.dart';
-import 'package:anime_flow/shared/models/bangumi/actor_item.dart';
 import 'package:anime_flow/shared/models/bangumi/producers_item.dart';
 import 'package:anime_flow/shared/models/bangumi/related_subjects_item.dart';
 import 'package:anime_flow/shared/models/bangumi/subject_comments_item.dart';
@@ -31,19 +30,11 @@ class AnimeInfoRemoteDataSource {
     int subjectId, {
     required int limit,
     required int offset,
+    int? type = 2,
     CancelToken? cancelToken,
   }) =>
       FlowApi.relatedSubjectsService(subjectId,
-          limit: limit, offset: offset, cancelToken: cancelToken);
-
-  Future<CharactersItem> getCharacters(
-    int subjectId, {
-    required int limit,
-    required int offset,
-    CancelToken? cancelToken,
-  }) =>
-      FlowApi.charactersService(subjectId,
-          limit: limit, offset: offset, cancelToken: cancelToken);
+          limit: limit, offset: offset, type: type, cancelToken: cancelToken);
 
   Future<ProducersItem> getProducers(
     int subjectId, {

@@ -38,7 +38,7 @@ final class CharacterInfoDetailProvider
 }
 
 String _$characterInfoDetailHash() =>
-    r'42e45bafb8430bd9ced78338983fa872859e53b3';
+    r'e0b114d757179e102afb26964da5cd4beeb50f2c';
 
 abstract class _$CharacterInfoDetail
     extends $AsyncNotifier<CharacterDetailItem> {
@@ -85,7 +85,7 @@ final class CharacterWorksProvider
   CharacterWorks create() => CharacterWorks();
 }
 
-String _$characterWorksHash() => r'46558719fb9b45674cde49c712992821e0451f14';
+String _$characterWorksHash() => r'0fd4790adc88a4db0bc70f18b46f6c4e72920448';
 
 abstract class _$CharacterWorks extends $AsyncNotifier<CharacterCastsItem> {
   FutureOr<CharacterCastsItem> build();

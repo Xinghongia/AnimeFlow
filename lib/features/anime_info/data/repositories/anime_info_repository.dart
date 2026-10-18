@@ -1,6 +1,9 @@
+import 'dart:convert';
+
+import 'package:anime_flow/core/cache/json_response_cache.dart';
+import 'package:anime_flow/core/settings/storage.dart';
 import 'package:anime_flow/features/anime_info/data/datasources/anime_info_local_data_source.dart';
 import 'package:anime_flow/features/anime_info/data/datasources/anime_info_remote_data_source.dart';
-import 'package:anime_flow/shared/models/bangumi/actor_item.dart';
 import 'package:anime_flow/shared/models/bangumi/producers_item.dart';
 import 'package:anime_flow/shared/models/bangumi/related_subjects_item.dart';
 import 'package:anime_flow/shared/models/bangumi/subject_comments_item.dart';
@@ -9,13 +12,13 @@ import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 
 class AnimeInfoRepository {
-  static const _cacheMaxAge = Duration(hours: 12);
-
   final _local = AnimeInfoLocalDataSource();
   final _remote = AnimeInfoRemoteDataSource();
   Future<void> _cacheReady = Future.value();
   int _generation = 0;
   bool _cacheReadable = true;
+  final _commentsGenerations = <int, int>{};
+  Future<void> _commentsCacheReady = Future.value();
 
   /// 在下次读取前清空缓存，并阻止失效前发出的请求重新写入旧数据。
   void invalidateCache() {
@@ -51,7 +54,10 @@ class AnimeInfoRepository {
             if (cancelToken?.isCancelled ?? false) return;
             if (generation != _generation) continue;
             final age = DateTime.now().millisecondsSinceEpoch - cached.cachedAt;
-            if (age >= 0 && age < _cacheMaxAge.inMilliseconds) return;
+            if (age >= 0 &&
+                age < JsonResponseCache.defaultMaxAge.inMilliseconds) {
+              return;
+            }
           }
         } catch (error) {
           debugPrint('Failed to read subject cache: $error');
@@ -102,34 +108,97 @@ class AnimeInfoRepository {
     required int limit,
     required int offset,
     CancelToken? cancelToken,
-  }) =>
-      _remote.getComments(subjectId,
-          limit: limit, offset: offset, cancelToken: cancelToken);
+    bool forceRefresh = false,
+  }) async {
+    while (true) {
+      await _commentsCacheReady;
+      if (cancelToken?.isCancelled ?? false) throw cancelToken!.cancelError!;
+      var generation = _commentsGenerations[subjectId] ?? 0;
+      bool isCurrent() => generation == (_commentsGenerations[subjectId] ?? 0);
+      try {
+        final result = await JsonResponseCache.get(
+          Storage.subjectCommentsCache,
+          '$subjectId:$limit:$offset',
+          load: () async {
+            final page = await _remote.getComments(subjectId,
+                limit: limit, offset: offset, cancelToken: cancelToken);
+            if (cancelToken?.isCancelled ?? false) {
+              throw cancelToken!.cancelError!;
+            }
+            // 首页获取成功后才清理旧页，失败时仍可回退到完整旧缓存。
+            if (offset == 0 && isCurrent()) {
+              generation = await invalidateCommentsCache(subjectId);
+            }
+            return page;
+          },
+          fromJson: SubjectCommentItem.fromJson,
+          toJson: (item) => item.toJson(),
+          cancelToken: cancelToken,
+          forceRefresh: forceRefresh,
+          maxAge: const Duration(hours: 1),
+          maxEntries: 20,
+          shouldCache: isCurrent,
+        );
+        if (cancelToken?.isCancelled ?? false) throw cancelToken!.cancelError!;
+        if (isCurrent()) return result;
+      } catch (_) {
+        if (cancelToken?.isCancelled ?? false) throw cancelToken!.cancelError!;
+        if (isCurrent()) rethrow;
+      }
+      // 失效期间的响应不能写回或交给页面，仍有效的请求重新加载。
+    }
+  }
+
+  Future<int> invalidateCommentsCache(int subjectId) {
+    final generation = (_commentsGenerations[subjectId] ?? 0) + 1;
+    _commentsGenerations[subjectId] = generation;
+    _commentsCacheReady = _commentsCacheReady.then((_) async {
+      final box = Storage.subjectCommentsCache;
+      final keys = box.keys
+          .whereType<String>()
+          .where((key) => key.startsWith('$subjectId:'))
+          .toList();
+      await box.deleteAll(keys);
+    }).catchError((Object error) {
+      debugPrint('Failed to clear comments cache: $error');
+    });
+    return _commentsCacheReady.then((_) => generation);
+  }
 
   Future<SubjectRelationItem> getRelated(
     int subjectId, {
     required int limit,
     required int offset,
+    int? type = 2,
     CancelToken? cancelToken,
+    bool forceRefresh = false,
   }) =>
-      _remote.getRelated(subjectId,
-          limit: limit, offset: offset, cancelToken: cancelToken);
-
-  Future<CharactersItem> getCharacters(
-    int subjectId, {
-    required int limit,
-    required int offset,
-    CancelToken? cancelToken,
-  }) =>
-      _remote.getCharacters(subjectId,
-          limit: limit, offset: offset, cancelToken: cancelToken);
+      JsonResponseCache.get(
+        Storage.subjectMetadataCache,
+        jsonEncode(['related', subjectId, limit, offset, type]),
+        load: () => _remote.getRelated(subjectId,
+            limit: limit, offset: offset, type: type, cancelToken: cancelToken),
+        fromJson: SubjectRelationItem.fromJson,
+        toJson: (item) => item.toJson(),
+        cancelToken: cancelToken,
+        forceRefresh: forceRefresh,
+      );
 
   Future<ProducersItem> getProducers(
     int subjectId, {
     required int limit,
     required int offset,
     CancelToken? cancelToken,
+    bool forceRefresh = false,
   }) =>
-      _remote.getProducers(subjectId,
-          limit: limit, offset: offset, cancelToken: cancelToken);
+      JsonResponseCache.get(
+        Storage.subjectMetadataCache,
+        jsonEncode(['producers', subjectId, limit, offset]),
+        load: () => _remote.getProducers(subjectId,
+            limit: limit, offset: offset, cancelToken: cancelToken),
+        fromJson: ProducersItem.fromJson,
+        toJson: (item) => item.toJson(),
+        cancelToken: cancelToken,
+        forceRefresh: forceRefresh,
+      );
 }
