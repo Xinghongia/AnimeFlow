@@ -323,47 +323,63 @@ class _GeneralSettingsPageState extends ConsumerState<GeneralSettingsPage> {
             },
           ),
           const SizedBox(height: 12),
-          LayoutBuilder(
-            builder: (context, constraints) {
-              final fieldWidth =
-                  constraints.maxWidth < 248 ? constraints.maxWidth : 248.0;
-              return Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                crossAxisAlignment: WrapCrossAlignment.center,
-                children: [
-                  for (final controller in route.ips)
-                    SizedBox(
-                      width: fieldWidth,
-                      child: TextFormField(
-                        key: ValueKey(controller),
-                        controller: controller,
-                        decoration: InputDecoration(
-                          labelText: l10n.echImageFixedIp,
-                          suffixIcon: IconButton(
-                            tooltip: l10n.delete,
-                            icon: const Icon(Icons.close),
-                            onPressed: () => _removeEchIp(route, controller),
+          ExpansionTile(
+            key: PageStorageKey(route),
+            initiallyExpanded: false,
+            maintainState: true,
+            tilePadding: EdgeInsets.zero,
+            childrenPadding: const EdgeInsets.only(bottom: 8),
+            shape: const Border(),
+            collapsedShape: const Border(),
+            title: Text('${l10n.echImageFixedIp} (${route.ips.length})'),
+            children: [
+              LayoutBuilder(
+                builder: (context, constraints) {
+                  final fieldWidth =
+                      constraints.maxWidth < 248 ? constraints.maxWidth : 248.0;
+                  return Align(
+                    alignment: Alignment.centerLeft,
+                    child: Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      children: [
+                        for (final controller in route.ips)
+                          SizedBox(
+                            width: fieldWidth,
+                            child: TextFormField(
+                              key: ValueKey(controller),
+                              controller: controller,
+                              decoration: InputDecoration(
+                                labelText: l10n.echImageFixedIp,
+                                suffixIcon: IconButton(
+                                  tooltip: l10n.delete,
+                                  icon: const Icon(Icons.close),
+                                  onPressed: () =>
+                                      _removeEchIp(route, controller),
+                                ),
+                              ),
+                              keyboardType: TextInputType.url,
+                              validator: (value) {
+                                final ip = value?.trim() ?? '';
+                                if (ip.isEmpty) return l10n.echImageIpRequired;
+                                return InternetAddress.tryParse(ip) != null
+                                    ? null
+                                    : l10n.echImageInvalidIp;
+                              },
+                            ),
                           ),
+                        TextButton.icon(
+                          onPressed: () => _addEchIp(route),
+                          icon: const Icon(Icons.add),
+                          label: Text(l10n.echImageAddIp),
                         ),
-                        keyboardType: TextInputType.url,
-                        validator: (value) {
-                          final ip = value?.trim() ?? '';
-                          if (ip.isEmpty) return l10n.echImageIpRequired;
-                          return InternetAddress.tryParse(ip) != null
-                              ? null
-                              : l10n.echImageInvalidIp;
-                        },
-                      ),
+                      ],
                     ),
-                  TextButton.icon(
-                    onPressed: () => _addEchIp(route),
-                    icon: const Icon(Icons.add),
-                    label: Text(l10n.echImageAddIp),
-                  ),
-                ],
-              );
-            },
+                  );
+                },
+              )
+            ],
           ),
           const Divider(),
         ],
