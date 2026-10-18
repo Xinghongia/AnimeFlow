@@ -18,6 +18,7 @@ class EpisodesData {
     this.episodeId = 0,
     this.isLoadingMore = false,
     this.hasMore = false,
+    this.loadMoreError,
   });
 
   /// 当前番剧 id
@@ -44,6 +45,9 @@ class EpisodesData {
   /// 是否还有更多剧集可加载
   final bool hasMore;
 
+  /// 分页失败时保留已有剧集，由界面展示错误并提供重试。
+  final Object? loadMoreError;
+
   EpisodesData copyWith({
     int? subjectId,
     EpisodesItem? episodes,
@@ -53,6 +57,8 @@ class EpisodesData {
     int? episodeId,
     bool? isLoadingMore,
     bool? hasMore,
+    Object? loadMoreError,
+    bool clearLoadMoreError = false,
   }) {
     return EpisodesData(
       subjectId: subjectId ?? this.subjectId,
@@ -63,6 +69,8 @@ class EpisodesData {
       episodeId: episodeId ?? this.episodeId,
       isLoadingMore: isLoadingMore ?? this.isLoadingMore,
       hasMore: hasMore ?? this.hasMore,
+      loadMoreError:
+          clearLoadMoreError ? null : loadMoreError ?? this.loadMoreError,
     );
   }
 }
@@ -160,18 +168,20 @@ class Episodes extends _$Episodes {
     SubjectEpisodesState subjectEpisodes,
   ) {
     final episodes = subjectEpisodes.episodes;
+    final data = EpisodesData(
+      subjectId: subjectId,
+      episodes: episodes,
+      isLoadingMore: subjectEpisodes.isLoadingMore,
+      hasMore: subjectEpisodes.hasMore,
+      loadMoreError: subjectEpisodes.loadMoreError,
+    );
     final continueEpisodeId = ref.read(playExtraProvider).continueEpisodeId;
     final current = _currentData;
     final selectedEpisodeId =
         _selectedSubjectId == subjectId ? _selectedEpisodeId : null;
 
     if (episodes.data.isEmpty) {
-      return EpisodesData(
-        subjectId: subjectId,
-        episodes: episodes,
-        isLoadingMore: subjectEpisodes.isLoadingMore,
-        hasMore: subjectEpisodes.hasMore,
-      );
+      return data;
     }
 
     final selection = current != null && current.subjectId == subjectId
@@ -193,26 +203,17 @@ class Episodes extends _$Episodes {
               continueEpisodeId: continueEpisodeId,
             );
     if (selection == null) {
-      return EpisodesData(
-        subjectId: subjectId,
-        episodes: episodes,
-        isLoadingMore: subjectEpisodes.isLoadingMore,
-        hasMore: subjectEpisodes.hasMore,
-      );
+      return data;
     }
 
     _selectedSubjectId = subjectId;
     _selectedEpisodeId = selection.id;
 
-    return EpisodesData(
-      subjectId: subjectId,
-      episodes: episodes,
+    return data.copyWith(
       episodeTitle: selection.title,
       episodeSort: selection.sort,
       episodeIndex: selection.index,
       episodeId: selection.id,
-      isLoadingMore: subjectEpisodes.isLoadingMore,
-      hasMore: subjectEpisodes.hasMore,
     );
   }
 
@@ -249,6 +250,17 @@ class Episodes extends _$Episodes {
       current.episodeIndex,
       requireAired: !ref.read(playExtraProvider).isOfflineMode,
     );
+  }
+
+  /// 通过条目剧集列表的统一入口更新观看状态，复用生命周期与会话保护。
+  Future<void> updateEpisodeWatched(int episodeId,
+      {bool watched = true}) async {
+    if (!ref.mounted) return;
+    final current = _currentData;
+    if (current == null || current.subjectId <= 0) return;
+    await ref
+        .read(subjectEpisodesProvider(current.subjectId).notifier)
+        .updateEpisodeWatched(episodeId: episodeId, watched: watched);
   }
 
   /// 从当前播放会话的剧集列表中选集，兼容离线播放。

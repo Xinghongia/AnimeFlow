@@ -10,6 +10,7 @@ import 'package:anime_flow/shared/widgets/notification_toast.dart';
 import 'package:anime_flow/shared/widgets/animation_network_image.dart';
 import 'package:anime_flow/features/play/presentation/widgets/layout_toggle_icon.dart';
 import 'package:anime_flow/features/play/presentation/widgets/loading_animation.dart';
+import 'package:anime_flow/features/play/presentation/widgets/episode_load_more_error.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -69,6 +70,7 @@ class _EpisodesListViewState extends ConsumerState<EpisodesListView> {
           ref.read(subjectEpisodesProvider(subjectId)).asData?.value;
       if (episodesState == null ||
           !episodesState.hasMore ||
+          episodesState.loadMoreError != null ||
           episodesState.isLoadingMore) {
         return;
       }
@@ -117,7 +119,7 @@ class _EpisodesListViewState extends ConsumerState<EpisodesListView> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final episodesAsync = ref.watch(episodesProvider);
-    final hasEpisodes = episodesAsync.asData?.value.episodes != null;
+    final hasEpisodes = episodesAsync.value?.episodes != null;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -136,6 +138,7 @@ class _EpisodesListViewState extends ConsumerState<EpisodesListView> {
           ],
         ),
         episodesAsync.when(
+          skipLoadingOnReload: true,
           loading: () => Column(
             children: [
               const LinearProgressIndicator(),
@@ -144,9 +147,21 @@ class _EpisodesListViewState extends ConsumerState<EpisodesListView> {
             ],
           ),
           error: (error, _) => _buildLoadError(error),
-          data: (episodesState) => isGridView
-              ? buildGridEpisodes(episodesState)
-              : buildListEpisodes(episodesState),
+          data: (episodesState) => Column(
+            children: [
+              isGridView
+                  ? buildGridEpisodes(episodesState)
+                  : buildListEpisodes(episodesState),
+              if (episodesState.loadMoreError != null)
+                EpisodeLoadMoreError(
+                  error: episodesState.loadMoreError!,
+                  onRetry: () => ref
+                      .read(subjectEpisodesProvider(episodesState.subjectId)
+                          .notifier)
+                      .loadMore(),
+                ),
+            ],
+          ),
         ),
       ],
     );

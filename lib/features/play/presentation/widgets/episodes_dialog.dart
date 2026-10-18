@@ -4,6 +4,7 @@ import 'package:anime_flow/core/constants/layout_constant.dart';
 import 'package:anime_flow/shared/models/player/bangumi/episodes_item.dart';
 import 'package:anime_flow/features/play/presentation/providers/episodes_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/subject_episodes_provider.dart';
+import 'package:anime_flow/features/play/presentation/widgets/episode_load_more_error.dart';
 import 'package:anime_flow/app/router/routes_args.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -40,7 +41,7 @@ class _EpisodesDialogState extends ConsumerState<EpisodesDialog> {
   @override
   Widget build(BuildContext context) {
     final episodesAsync = ref.watch(episodesProvider);
-    final episodesState = episodesAsync.asData?.value;
+    final episodesState = episodesAsync.value;
     final episodes = episodesState?.episodes?.data;
     final selectedEpisodeId = episodesState?.episodeId ?? 0;
     final subjectId =
@@ -110,6 +111,7 @@ class _EpisodesDialogState extends ConsumerState<EpisodesDialog> {
 
     if (episodesState == null ||
         episodesState.isLoadingMore ||
+        episodesState.loadMoreError != null ||
         !episodesState.hasMore) {
       return;
     }
@@ -160,9 +162,9 @@ class _EpisodesDialogState extends ConsumerState<EpisodesDialog> {
     required int selectedEpisodeId,
     required int subjectId,
   }) {
-    final episodesState = episodesAsync.asData?.value;
+    final episodesState = episodesAsync.value;
 
-    if (episodesAsync.isLoading) {
+    if (episodesAsync.isLoading && episodesState == null) {
       return const Center(child: CircularProgressIndicator());
     }
 
@@ -205,10 +207,22 @@ class _EpisodesDialogState extends ConsumerState<EpisodesDialog> {
       },
       child: ListView.builder(
         controller: _scrollController,
-        itemCount:
-            episodes.length + (episodesState?.isLoadingMore == true ? 1 : 0),
+        itemCount: episodes.length +
+            (episodesState?.isLoadingMore == true ||
+                    episodesState?.loadMoreError != null
+                ? 1
+                : 0),
         itemBuilder: (BuildContext context, int index) {
           if (index >= episodes.length) {
+            if (episodesState?.isLoadingMore != true &&
+                episodesState?.loadMoreError != null) {
+              return EpisodeLoadMoreError(
+                error: episodesState!.loadMoreError!,
+                onRetry: () => ref
+                    .read(subjectEpisodesProvider(subjectId).notifier)
+                    .loadMore(),
+              );
+            }
             return const Padding(
               padding: EdgeInsets.symmetric(vertical: 12),
               child: Center(

@@ -1,7 +1,9 @@
 import 'package:anime_flow/core/network/api/flow_api.dart';
+import 'package:anime_flow/features/user/presentation/providers/user_state_provider.dart';
 import 'package:anime_flow/shared/models/player/bangumi/episodes_item.dart';
 import 'package:flutter/foundation.dart';
 import 'package:dio/dio.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'subject_episodes_provider.g.dart';
@@ -171,6 +173,11 @@ class SubjectEpisodes extends _$SubjectEpisodes {
       _revision++;
       cancelToken.cancel();
     });
+    // 观看状态属于当前账号；会话变化时重建，并等待凭证就绪后再请求。
+    ref.watch(
+        currentFlowTokenProvider.select((token) => token.value?.sessionId));
+    await ref.read(currentFlowTokenProvider.future);
+    if (!_isCurrent(revision)) throw cancelToken.cancelError!;
     final episodes = await fetchPage(subjectId, offset: 0);
     if (_isCurrent(revision)) _nextOffset = episodes.data.length;
     return SubjectEpisodesState(
@@ -188,6 +195,10 @@ class SubjectEpisodes extends _$SubjectEpisodes {
   }
 
   bool _isCurrent(int revision) => ref.mounted && revision == _revision;
+
+  bool _isCurrentSession(int revision, String? sessionId) =>
+      _isCurrent(revision) &&
+      ref.read(currentFlowTokenProvider).value?.sessionId == sessionId;
 
   /// Returns whether new episodes were added. Concurrent callers share a request.
   Future<bool> loadMore() {
@@ -278,10 +289,15 @@ class SubjectEpisodes extends _$SubjectEpisodes {
     required int episodeId,
     bool watched = true,
   }) async {
+    if (!ref.mounted) return;
+    final revision = _revision;
+    final sessionId = ref.read(currentFlowTokenProvider).value?.sessionId;
     await FlowApi.updateEpisodeWatchedService(
       episodeId,
       watched: watched,
     );
+    // 页面销毁、刷新或切换账号后，旧请求不能写回当前列表。
+    if (!_isCurrentSession(revision, sessionId)) return;
     setEpisodeWatched(
       episodeId: episodeId,
       watched: watched,
@@ -289,7 +305,11 @@ class SubjectEpisodes extends _$SubjectEpisodes {
   }
 
   Future<void> markAllEpisodesWatched() async {
+    if (!ref.mounted) return;
+    final revision = _revision;
+    final sessionId = ref.read(currentFlowTokenProvider).value?.sessionId;
     await FlowApi.markAllEpisodesWatchedService(subjectId);
+    if (!_isCurrentSession(revision, sessionId)) return;
 
     final current = state.asData?.value;
     if (current == null) {
@@ -311,6 +331,7 @@ class SubjectEpisodes extends _$SubjectEpisodes {
     required int episodeId,
     required bool watched,
   }) {
+    if (!ref.mounted) return;
     final current = state.asData?.value;
     if (current == null) {
       return;

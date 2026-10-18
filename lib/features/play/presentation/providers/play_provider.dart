@@ -17,7 +17,6 @@ import 'package:anime_flow/features/play/presentation/providers/subject_episodes
 import 'package:anime_flow/features/play/presentation/providers/video_ui_provider.dart';
 import 'package:anime_flow/features/shaders/shaders_controller.dart';
 import 'package:anime_flow/features/user/presentation/providers/user_state_provider.dart';
-import 'package:anime_flow/core/network/api/flow_api.dart';
 import 'package:anime_flow/core/presence/presence_service.dart';
 import 'package:anime_flow/app/router/routes_args.dart';
 import 'package:anime_flow/core/logger/logger.dart';
@@ -80,6 +79,7 @@ PlaySession playSession(Ref ref) {
       required episodeId,
       required watched,
     }) {
+      if (!ref.mounted) return;
       ref.read(subjectEpisodesProvider(subjectId).notifier).setEpisodeWatched(
             episodeId: episodeId,
             watched: watched,
@@ -795,16 +795,8 @@ class PlaySession {
   /// 更新剧集观看状态
   Future<void> updateEpisodeWatched(int episodeId,
       {bool watched = true}) async {
-    final targetSubjectId = subjectId;
-    await FlowApi.updateEpisodeWatchedService(episodeId, watched: watched);
-    if (targetSubjectId <= 0) {
-      return;
-    }
-    _setEpisodeWatched(
-      subjectId: targetSubjectId,
-      episodeId: episodeId,
-      watched: watched,
-    );
+    if (_isDisposed || subjectId <= 0) return;
+    await _episodesActions.updateEpisodeWatched(episodeId, watched: watched);
   }
 
   void updateIsWideScreen(bool value) {
