@@ -12,6 +12,7 @@ enum CacheCategory {
   subjectComments,
   popularAnime,
   calendar,
+  subjectEpisodes,
 }
 
 class CacheUsage {
@@ -30,6 +31,7 @@ class CacheUsageService {
         CacheCategory.subjectComments: Storage.subjectCommentsCache,
         CacheCategory.popularAnime: Storage.popularAnimeCache,
         CacheCategory.calendar: Storage.calendarCache,
+        CacheCategory.subjectEpisodes: Storage.subjectEpisodesCache,
       };
 
   Future<void> clearData(Set<CacheCategory> selected) async {

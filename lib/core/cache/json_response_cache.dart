@@ -89,8 +89,12 @@ class JsonResponseCache {
             'data': toJson(result),
           }));
       if (box.length > maxEntries) {
-        final entries = box.toMap().entries.toList()
-          ..sort((a, b) => _cachedAt(a.value).compareTo(_cachedAt(b.value)));
+        final entries = box
+            .toMap()
+            .entries
+            .map((entry) => (key: entry.key, cachedAt: _cachedAt(entry.value)))
+            .toList()
+          ..sort((a, b) => a.cachedAt.compareTo(b.cachedAt));
         await box.deleteAll(
           entries.take(box.length - maxEntries).map((entry) => entry.key),
         );

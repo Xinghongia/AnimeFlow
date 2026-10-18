@@ -15,6 +15,7 @@ const _colors = [
   Color(0xFF50B86B),
   Color(0xFFE2689A),
   Color(0xFF27B6B1),
+  Color(0xFFB89552),
 ];
 
 String cacheCategoryLabel(CacheCategory category, AppLocalizations l10n) =>
@@ -27,6 +28,7 @@ String cacheCategoryLabel(CacheCategory category, AppLocalizations l10n) =>
       CacheCategory.subjectComments => l10n.commentsTitle,
       CacheCategory.popularAnime => l10n.popularAnimeTitle,
       CacheCategory.calendar => l10n.todayBroadcast,
+      CacheCategory.subjectEpisodes => l10n.episodeList,
     };
 
 /// 图表按已选缓存重新分配扇区，选择变化时平滑收缩或扩展。
@@ -94,8 +96,8 @@ class CacheUsagePanel extends StatelessWidget {
               key: const ValueKey('clear-selected-cache'),
               onPressed: busy || selectedBytes == 0 ? null : onClear,
               style: FilledButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(
-                      vertical: 16, horizontal: 12)),
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 16, horizontal: 12)),
               child: Text(
                   clearing
                       ? l10n.imageCacheClearing

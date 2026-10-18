@@ -16,6 +16,7 @@ class Storage {
   static late final Box<String> characterDataCache;
   static late final Box<String> subjectMetadataCache;
   static late final Box<String> subjectCommentsCache;
+  static late final Box<String> subjectEpisodesCache;
   static late final Box<String> popularAnimeCache;
   static late final Box<String> calendarCache;
 
@@ -37,6 +38,8 @@ class Storage {
         await _openBoxWithFallback<String>(StorageKey.subjectMetadataCacheKey);
     subjectCommentsCache =
         await _openBoxWithFallback<String>(StorageKey.subjectCommentsCacheKey);
+    subjectEpisodesCache =
+        await _openBoxWithFallback<String>(StorageKey.subjectEpisodesCacheKey);
     popularAnimeCache =
         await _openBoxWithFallback<String>(StorageKey.popularAnimeCacheKey);
     calendarCache =

@@ -1,4 +1,7 @@
-import 'package:anime_flow/core/network/api/flow_api.dart';
+import 'dart:async';
+
+import 'package:anime_flow/features/play/data/repository/subject_episodes_repository.dart';
+import 'package:anime_flow/features/user/application/collection_revision_provider.dart';
 import 'package:anime_flow/features/user/presentation/providers/user_state_provider.dart';
 import 'package:anime_flow/shared/models/player/bangumi/episodes_item.dart';
 import 'package:flutter/foundation.dart';
@@ -163,12 +166,20 @@ class SubjectEpisodes extends _$SubjectEpisodes {
   int _revision = 0;
   int _nextOffset = 0;
   late CancelToken _cancelToken;
+  String? _sessionId;
+  Future<void>? _refreshFuture;
+  final _watchedChanges = <int, bool>{};
+  bool _allWatched = false;
 
   @override
   Future<SubjectEpisodesState> build(int subjectId) async {
     final revision = ++_revision;
     final cancelToken = _cancelToken = CancelToken();
     _pendingPage = null;
+    _refreshFuture = null;
+    _watchedChanges.clear();
+    _allWatched = false;
+    final forceRefresh = ref.isRefresh;
     ref.onDispose(() {
       _revision++;
       cancelToken.cancel();
@@ -176,19 +187,65 @@ class SubjectEpisodes extends _$SubjectEpisodes {
     // 观看状态属于当前账号；会话变化时重建，并等待凭证就绪后再请求。
     ref.watch(
         currentFlowTokenProvider.select((token) => token.value?.sessionId));
-    await ref.read(currentFlowTokenProvider.future);
+    ref.watch(collectionRevisionProvider);
+    final repository = ref.watch(subjectEpisodesRepositoryProvider.notifier);
+    final token = await ref.read(currentFlowTokenProvider.future);
     if (!_isCurrent(revision)) throw cancelToken.cancelError!;
+    _sessionId = token?.sessionId;
+    final cached = await repository.readPage(subjectId,
+        sessionId: _sessionId, limit: _episodesPageSize, offset: 0);
+    if (!_isCurrent(revision)) throw cancelToken.cancelError!;
+    if (cached != null) {
+      _nextOffset = cached.data.data.length;
+      if (forceRefresh || !cached.isFresh) {
+        // 先完成缓存展示，再刷新首页；后续翻页等待刷新结束，避免混用页边界。
+        _refreshFuture = Future<void>(() => _refreshCachedPage(revision));
+      }
+      return _pageState(cached.data);
+    }
     final episodes = await fetchPage(subjectId, offset: 0);
     if (_isCurrent(revision)) _nextOffset = episodes.data.length;
-    return SubjectEpisodesState(
-      episodes: _deduplicate(episodes),
-      isExhausted: episodes.data.isEmpty,
-    );
+    return _pageState(episodes);
+  }
+
+  SubjectEpisodesState _pageState(EpisodesItem page) => SubjectEpisodesState(
+        episodes: _deduplicate(_applyWatchedChanges(page)),
+        isExhausted: page.data.isEmpty,
+      );
+
+  /// 刷新或分页响应不能覆盖当前页面中刚完成的观看状态修改。
+  EpisodesItem _applyWatchedChanges(EpisodesItem page) => page.copyWith(
+        data: page.data.map((episode) {
+          final watched =
+              _watchedChanges[episode.id] ?? (_allWatched ? true : null);
+          return watched == null ? episode : episode.copyWith(watched: watched);
+        }).toList(),
+      );
+
+  Future<void> _refreshCachedPage(int revision) async {
+    if (!_isCurrent(revision)) return;
+    try {
+      final page = await ref
+          .read(subjectEpisodesRepositoryProvider.notifier)
+          .getPage(subjectId,
+              sessionId: _sessionId,
+              limit: _episodesPageSize,
+              offset: 0,
+              cancelToken: _cancelToken,
+              forceRefresh: true,
+              fallbackToCache: false);
+      if (!_isCurrent(revision)) return;
+      _nextOffset = page.data.length;
+      state = AsyncData(_pageState(page));
+    } catch (error) {
+      // 刷新失败继续展示旧页，下一次进入或主动重试时再刷新。
+      if (_isCurrent(revision)) debugPrint('刷新剧集缓存失败：$error');
+    }
   }
 
   Future<void> retry() async {
     ref.invalidateSelf();
-    // Initial errors remain exposed through the provider's AsyncError.
+    // 首次加载失败仍通过 provider 的 AsyncError 展示。
     try {
       await future;
     } catch (_) {}
@@ -200,7 +257,7 @@ class SubjectEpisodes extends _$SubjectEpisodes {
       _isCurrent(revision) &&
       ref.read(currentFlowTokenProvider).value?.sessionId == sessionId;
 
-  /// Returns whether new episodes were added. Concurrent callers share a request.
+  /// 返回是否新增了剧集，并发调用共享同一次分页请求。
   Future<bool> loadMore() {
     if (!ref.mounted) return Future.value(false);
     final pending = _pendingPage;
@@ -215,8 +272,11 @@ class SubjectEpisodes extends _$SubjectEpisodes {
 
   Future<bool> _loadMore(int revision) async {
     try {
-      final current = await future;
-      if (!_isCurrent(revision) || !current.hasMore) return false;
+      await future;
+      await _refreshFuture;
+      if (!_isCurrent(revision)) return false;
+      final current = state.requireValue;
+      if (!current.hasMore) return false;
       state = AsyncData(current.copyWith(
         isLoadingMore: true,
         clearLoadMoreError: true,
@@ -226,10 +286,10 @@ class SubjectEpisodes extends _$SubjectEpisodes {
         offset: _nextOffset,
       );
       if (!_isCurrent(revision)) return false;
-      // Preserve watched changes made while the page request was in flight.
+      // 保留分页请求期间发生的观看状态修改。
       final latest = state.requireValue;
       final merged = _deduplicate(latest.episodes.copyWith(
-        data: [...latest.episodes.data, ...page.data],
+        data: [...latest.episodes.data, ..._applyWatchedChanges(page).data],
         total: page.total,
       ));
       final progressed = merged.data.length > latest.episodes.data.length;
@@ -281,8 +341,10 @@ class SubjectEpisodes extends _$SubjectEpisodes {
 
   @protected
   Future<EpisodesItem> fetchPage(int subjectId, {required int offset}) =>
-      FlowApi.getSubjectEpisodesByIdService(
-          subjectId, _episodesPageSize, offset,
+      ref.read(subjectEpisodesRepositoryProvider.notifier).getPage(subjectId,
+          sessionId: _sessionId,
+          limit: _episodesPageSize,
+          offset: offset,
           cancelToken: _cancelToken);
 
   Future<void> updateEpisodeWatched({
@@ -292,13 +354,13 @@ class SubjectEpisodes extends _$SubjectEpisodes {
     if (!ref.mounted) return;
     final revision = _revision;
     final sessionId = ref.read(currentFlowTokenProvider).value?.sessionId;
-    await FlowApi.updateEpisodeWatchedService(
-      episodeId,
-      watched: watched,
-    );
+    await ref
+        .read(subjectEpisodesRepositoryProvider.notifier)
+        .updateEpisodeWatched(subjectId, episodeId,
+            sessionId: sessionId, watched: watched);
     // 页面销毁、刷新或切换账号后，旧请求不能写回当前列表。
     if (!_isCurrentSession(revision, sessionId)) return;
-    setEpisodeWatched(
+    _applyEpisodeWatched(
       episodeId: episodeId,
       watched: watched,
     );
@@ -308,9 +370,13 @@ class SubjectEpisodes extends _$SubjectEpisodes {
     if (!ref.mounted) return;
     final revision = _revision;
     final sessionId = ref.read(currentFlowTokenProvider).value?.sessionId;
-    await FlowApi.markAllEpisodesWatchedService(subjectId);
+    await ref
+        .read(subjectEpisodesRepositoryProvider.notifier)
+        .markAllEpisodesWatched(subjectId, sessionId: sessionId);
     if (!_isCurrentSession(revision, sessionId)) return;
 
+    _allWatched = true;
+    _watchedChanges.clear();
     final current = state.asData?.value;
     if (current == null) {
       return;
@@ -332,6 +398,19 @@ class SubjectEpisodes extends _$SubjectEpisodes {
     required bool watched,
   }) {
     if (!ref.mounted) return;
+    unawaited(ref.read(subjectEpisodesRepositoryProvider.notifier).cacheWatched(
+        subjectId,
+        sessionId: _sessionId,
+        episodeId: episodeId,
+        watched: watched));
+    _applyEpisodeWatched(episodeId: episodeId, watched: watched);
+  }
+
+  void _applyEpisodeWatched({
+    required int episodeId,
+    required bool watched,
+  }) {
+    _watchedChanges[episodeId] = watched;
     final current = state.asData?.value;
     if (current == null) {
       return;

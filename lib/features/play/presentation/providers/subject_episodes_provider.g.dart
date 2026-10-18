@@ -49,7 +49,7 @@ final class SubjectEpisodesProvider
   }
 }
 
-String _$subjectEpisodesHash() => r'668ab2b6207d6491d082e936f92b496aabfd5569';
+String _$subjectEpisodesHash() => r'9c47c7cf6740751ee5d1b2baf2616e082eb1fe05';
 
 final class SubjectEpisodesFamily extends $Family
     with
