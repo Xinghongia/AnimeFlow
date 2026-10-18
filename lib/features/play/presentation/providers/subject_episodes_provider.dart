@@ -46,7 +46,7 @@ class SubjectEpisodesState {
     return nextWatchedEpisodeSelection() ?? firstEpisodeSelection();
   }
 
-  /// 返回最后一个已观看剧集的下一集。
+  /// 返回最后一个已观看剧集之后、已到播出日期的下一集。
   ///
   /// 未通过路由指定剧集时，用它恢复到用户下一集应观看的内容。
   EpisodeSelection? nextWatchedEpisodeSelection() {
@@ -57,18 +57,8 @@ class SubjectEpisodesState {
       }
     }
 
-    if (lastWatchedIndex < 0 || lastWatchedIndex + 1 >= episodes.data.length) {
-      return null;
-    }
-
-    final nextEpisode = episodes.data[lastWatchedIndex + 1];
-    if (nextEpisode.name.isEmpty) {
-      return null;
-    }
-    return _buildEpisodeSelection(
-      episode: nextEpisode,
-      index: lastWatchedIndex + 2,
-    );
+    if (lastWatchedIndex < 0) return null;
+    return nextEpisodeSelection(lastWatchedIndex + 1);
   }
 
   EpisodeSelection? firstEpisodeSelection() {
@@ -94,26 +84,26 @@ class SubjectEpisodesState {
     return null;
   }
 
-  bool hasNextEpisode(int currentEpisodeIndex) {
-    return nextEpisodeSelection(currentEpisodeIndex) != null;
+  bool hasNextEpisode(int currentEpisodeIndex, {bool requireAired = true}) {
+    return nextEpisodeSelection(currentEpisodeIndex,
+            requireAired: requireAired) !=
+        null;
   }
 
-  EpisodeSelection? nextEpisodeSelection(int currentEpisodeIndex) {
-    if (episodes.data.isEmpty) {
+  /// 在线选集要求下一集已播出；离线选集由本地文件列表决定。
+  EpisodeSelection? nextEpisodeSelection(int currentEpisodeIndex,
+      {bool requireAired = true}) {
+    if (currentEpisodeIndex < 1 ||
+        currentEpisodeIndex >= episodes.data.length) {
       return null;
     }
-    final nextEpisodeIndex = currentEpisodeIndex + 1;
-    final dataIndex = nextEpisodeIndex - 1;
-    if (dataIndex >= episodes.data.length) {
-      return null;
-    }
-    final nextEpisode = episodes.data[dataIndex];
-    if (nextEpisode.name.isEmpty) {
+    final nextEpisode = episodes.data[currentEpisodeIndex];
+    if (requireAired && !nextEpisode.hasAired) {
       return null;
     }
     return _buildEpisodeSelection(
       episode: nextEpisode,
-      index: nextEpisodeIndex,
+      index: currentEpisodeIndex + 1,
     );
   }
 

@@ -63,6 +63,19 @@ class EpisodeData {
     this.cover,
   });
 
+  /// 按本地日期判断是否已播出，缺失或无效的播出日期不视为已播出。
+  bool get hasAired {
+    final value = airdate.trim();
+    if (value.length != 10) return false;
+    final date = DateTime.tryParse(value);
+    // 拒绝非法日期被自动进位，例如 2 月 31 日被解析为 3 月。
+    if (date == null || date.toIso8601String().substring(0, 10) != value) {
+      return false;
+    }
+    final now = DateTime.now();
+    return !date.isAfter(DateTime(now.year, now.month, now.day));
+  }
+
   EpisodeData copyWith({
     int? id,
     int? subjectID,

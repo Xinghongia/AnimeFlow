@@ -6,13 +6,13 @@ import 'package:anime_flow/features/play/presentation/providers/play_provider.da
 import 'package:anime_flow/features/play/presentation/providers/danmaku_state_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/video_ui_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/episodes_provider.dart';
+import 'package:anime_flow/features/play/presentation/providers/subject_episodes_provider.dart';
 import 'package:anime_flow/features/play/presentation/widgets/player/ui/button/fit_button.dart';
 import 'package:anime_flow/features/play/presentation/widgets/player/ui/button/rate_button.dart';
 import 'package:anime_flow/features/play/presentation/widgets/player/ui/button/shader_button.dart';
 import 'package:anime_flow/features/play/presentation/widgets/player/ui/danmaku/danmaku_setting_dialog.dart';
 import 'package:anime_flow/features/play/presentation/widgets/player/ui/player_progress_bar.dart';
 import 'package:anime_flow/features/play/presentation/widgets/player/ui/player_time_display.dart';
-import 'package:anime_flow/features/play/presentation/providers/subject_episodes_provider.dart';
 import 'package:anime_flow/shared/models/player/bangumi/episodes_item.dart';
 import 'package:anime_flow/features/user/presentation/providers/user_state_provider.dart';
 import 'package:anime_flow/core/logger/logger.dart';
@@ -23,6 +23,7 @@ import 'package:anime_flow/features/play/presentation/widgets/loading_animation.
 import 'package:anime_flow/features/play/presentation/widgets/episodes_dialog.dart';
 import 'package:anime_flow/features/play/presentation/widgets/play_pause_icon.dart';
 import 'package:anime_flow/app/localization/app_localizations.dart';
+import 'package:anime_flow/app/router/routes_args.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
@@ -316,15 +317,18 @@ class _BottomControlsContent extends ConsumerWidget {
                 // 下一集
                 Consumer(
                   builder: (context, ref, _) {
+                    final isOfflineMode = ref.watch(
+                      playExtraProvider.select((extra) => extra.isOfflineMode),
+                    );
                     final hasNextEpisode = ref.watch(
                       episodesProvider.select((state) {
-                        final episodesState = state.asData?.value;
-                        final episodes = episodesState?.episodes;
-                        return episodes != null &&
+                        final current = state.asData?.value;
+                        final episodes = current?.episodes;
+                        return current != null &&
+                            episodes != null &&
                             SubjectEpisodesState(episodes: episodes)
-                                    .nextEpisodeSelection(
-                                        episodesState!.episodeIndex) !=
-                                null;
+                                .hasNextEpisode(current.episodeIndex,
+                                    requireAired: !isOfflineMode);
                       }),
                     );
                     if (!hasNextEpisode) {

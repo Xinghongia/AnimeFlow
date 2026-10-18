@@ -238,7 +238,7 @@ class Episodes extends _$Episodes {
     return subjectEpisodes.selectionForContinueEpisode();
   }
 
-  /// 是否存在下一集（下一集的 name 字段不为空字符串）
+  /// 在线模式下判断下一集是否已到播出日期，离线模式下判断本地是否有下一集。
   bool get hasNextEpisode {
     final current = _currentData;
     final episodesData = current?.episodes;
@@ -247,10 +247,11 @@ class Episodes extends _$Episodes {
     }
     return SubjectEpisodesState(episodes: episodesData).hasNextEpisode(
       current.episodeIndex,
+      requireAired: !ref.read(playExtraProvider).isOfflineMode,
     );
   }
 
-  /// Select from the current session's episodes, including offline sessions.
+  /// 从当前播放会话的剧集列表中选集，兼容离线播放。
   void selectEpisode(int episodeId) {
     final current = _currentData;
     final episodes = current?.episodes;
@@ -281,7 +282,8 @@ class Episodes extends _$Episodes {
       return;
     }
     final selection = SubjectEpisodesState(episodes: episodesData)
-        .nextEpisodeSelection(current.episodeIndex);
+        .nextEpisodeSelection(current.episodeIndex,
+            requireAired: !ref.read(playExtraProvider).isOfflineMode);
     if (selection == null) return;
     selectEpisode(selection.id);
   }
