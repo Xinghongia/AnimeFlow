@@ -42,7 +42,7 @@ final class AnimeInfoRepositoryProvider
 }
 
 String _$animeInfoRepositoryHash() =>
-    r'ea984006266627cae1bd82b8a2c7a1227a8cc479';
+    r'05b4a491cd8879685ccfae3219cc1a0a8b7163d5';
 
 abstract class _$AnimeInfoRepository extends $Notifier<void> {
   void build();

@@ -488,6 +488,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get episodeSelection => 'Episodes';
 
   @override
+  String get subjectStillsTitle => 'Preview images';
+
+  @override
   String get switchToList => 'Switch to list';
 
   @override

@@ -155,6 +155,7 @@
   "danmakuSent": "Danmaku sent successfully",
   "danmakuUnsupported": "Sending danmaku is not supported",
   "episodeSelection": "Episodes",
+  "subjectStillsTitle": "Preview images",
   "switchToList": "Switch to list",
   "switchToGrid": "Switch to grid",
   "fetchingEpisodes": "Loading episodes...",

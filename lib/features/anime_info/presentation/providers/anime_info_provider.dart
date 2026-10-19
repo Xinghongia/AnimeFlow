@@ -111,11 +111,12 @@ class AnimeInfo extends _$AnimeInfo {
 @Riverpod(dependencies: [animeInfoArgs])
 class SubjectStills extends _$SubjectStills {
   @override
-  Future<List<String>> build() {
+  Stream<List<String>> build() {
     final subjectId = ref.watch(animeInfoArgsProvider.select((e) => e.id));
-    return ref
-        .watch(animeInfoRepositoryProvider.notifier)
-        .getStills(subjectId, cancelToken: _requestCancelToken(ref));
+    return ref.watch(animeInfoRepositoryProvider.notifier).watchStills(
+        subjectId,
+        cancelToken: _requestCancelToken(ref),
+        forceRefresh: ref.isRefresh);
   }
 }
 

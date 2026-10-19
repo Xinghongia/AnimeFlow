@@ -119,8 +119,41 @@ class AnimeInfoRepository extends _$AnimeInfoRepository {
     }
   }
 
-  Future<List<String>> getStills(int subjectId, {CancelToken? cancelToken}) =>
-      _remote.getStills(subjectId, cancelToken: cancelToken);
+  /// 先展示缓存的预览图列表，过期后后台刷新，空列表也参与缓存。
+  Stream<List<String>> watchStills(
+    int subjectId, {
+    CancelToken? cancelToken,
+    bool forceRefresh = false,
+  }) async* {
+    if (cancelToken?.isCancelled ?? false) throw cancelToken!.cancelError!;
+    final box = Storage.subjectMetadataCache;
+    final key = jsonEncode(['stills', subjectId]);
+    List<String> fromJson(Map<String, dynamic> json) =>
+        List<String>.from(json['images'] as List);
+    final cached = JsonResponseCache.read(box, key, fromJson: fromJson);
+    if (cached != null) {
+      yield cached.data;
+      if (!forceRefresh && cached.isFresh) return;
+    }
+    if (cancelToken?.isCancelled ?? false) return;
+    try {
+      final images = await JsonResponseCache.get<List<String>>(
+        box,
+        key,
+        load: () => _remote.getStills(subjectId, cancelToken: cancelToken),
+        fromJson: fromJson,
+        toJson: (images) => {'images': images},
+        cancelToken: cancelToken,
+        forceRefresh: true,
+        fallbackToCache: false,
+      );
+      if (!(cancelToken?.isCancelled ?? false)) yield images;
+    } catch (error) {
+      if (cancelToken?.isCancelled ?? false) return;
+      if (cached == null) rethrow;
+      debugPrint('刷新预览图缓存失败：$error');
+    }
+  }
 
   Future<SubjectCommentItem> getComments(
     int subjectId, {

@@ -59,7 +59,7 @@ abstract class _$AnimeInfo extends $StreamNotifier<SubjectsInfoItem> {
 final subjectStillsProvider = SubjectStillsProvider._();
 
 final class SubjectStillsProvider
-    extends $AsyncNotifierProvider<SubjectStills, List<String>> {
+    extends $StreamNotifierProvider<SubjectStills, List<String>> {
   SubjectStillsProvider._()
       : super(
           from: null,
@@ -83,10 +83,10 @@ final class SubjectStillsProvider
   SubjectStills create() => SubjectStills();
 }
 
-String _$subjectStillsHash() => r'a072252f2ad3053c35442e4fe6e8db174892bbe9';
+String _$subjectStillsHash() => r'5a8ba9ba7a25d689f56b3af9535cb47a381e5a26';
 
-abstract class _$SubjectStills extends $AsyncNotifier<List<String>> {
-  FutureOr<List<String>> build();
+abstract class _$SubjectStills extends $StreamNotifier<List<String>> {
+  Stream<List<String>> build();
   @$mustCallSuper
   @override
   void runBuild() {

@@ -24,7 +24,7 @@ String cacheCategoryLabel(CacheCategory category, AppLocalizations l10n) =>
       CacheCategory.animeInfo => l10n.animeInfoCacheLabel,
       CacheCategory.characters => l10n.charactersTitle,
       CacheCategory.subjectMetadata =>
-        '${l10n.producersTitle} / ${l10n.relatedTitle}',
+        '${l10n.producersTitle} / ${l10n.relatedTitle} / ${l10n.subjectStillsTitle}',
       CacheCategory.subjectComments => l10n.commentsTitle,
       CacheCategory.popularAnime => l10n.popularAnimeTitle,
       CacheCategory.calendar => l10n.todayBroadcast,

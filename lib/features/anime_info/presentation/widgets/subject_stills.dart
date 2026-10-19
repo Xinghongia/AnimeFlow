@@ -1,4 +1,5 @@
 import 'package:anime_flow/app/router/app_router.dart';
+import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/app/router/model/image_viewer_extra.dart';
 import 'package:anime_flow/app/router/routes_args.dart';
 import 'package:anime_flow/features/anime_info/presentation/providers/anime_info_provider.dart';
@@ -25,9 +26,9 @@ class SubjectStillsView extends ConsumerWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text('预览图',
-                    style:
-                        TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                Text(AppLocalizations.of(context).subjectStillsTitle,
+                    style: const TextStyle(
+                        fontSize: 20, fontWeight: FontWeight.bold)),
                 if (images.length > 10)
                   IconButton(
                       onPressed: () {
@@ -35,7 +36,8 @@ class SubjectStillsView extends ConsumerWidget {
                                 images: images, title: subjectName)
                             .push(context);
                       },
-                      icon: const Icon(Icons.keyboard_double_arrow_right_outlined))
+                      icon: const Icon(
+                          Icons.keyboard_double_arrow_right_outlined))
               ],
             ),
             const SizedBox(height: 10),

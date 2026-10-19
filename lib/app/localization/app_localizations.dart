@@ -962,6 +962,12 @@ abstract class AppLocalizations {
   /// **'选集'**
   String get episodeSelection;
 
+  /// No description provided for @subjectStillsTitle.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'预览图'**
+  String get subjectStillsTitle;
+
   /// No description provided for @switchToList.
   ///
   /// In zh_Hans, this message translates to:

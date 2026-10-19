@@ -478,6 +478,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get episodeSelection => '选集';
 
   @override
+  String get subjectStillsTitle => '预览图';
+
+  @override
   String get switchToList => '切换到列表';
 
   @override
@@ -2912,6 +2915,9 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
 
   @override
   String get episodeSelection => '选集';
+
+  @override
+  String get subjectStillsTitle => '预览图';
 
   @override
   String get switchToList => '切换到列表';
@@ -5349,6 +5355,9 @@ class AppLocalizationsZhHantHk extends AppLocalizationsZh {
   String get episodeSelection => '選集';
 
   @override
+  String get subjectStillsTitle => '預覽圖';
+
+  @override
   String get switchToList => '切換至列表';
 
   @override
@@ -7783,6 +7792,9 @@ class AppLocalizationsZhHantTw extends AppLocalizationsZh {
 
   @override
   String get episodeSelection => '選集';
+
+  @override
+  String get subjectStillsTitle => '預覽圖';
 
   @override
   String get switchToList => '切換到列表';

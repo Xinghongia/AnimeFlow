@@ -155,6 +155,7 @@
   "danmakuSent": "彈幕發送成功",
   "danmakuUnsupported": "目前不支援發送彈幕",
   "episodeSelection": "選集",
+  "subjectStillsTitle": "預覽圖",
   "switchToList": "切換到列表",
   "switchToGrid": "切換到網格",
   "fetchingEpisodes": "正在取得劇集...",
