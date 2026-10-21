@@ -34,7 +34,7 @@ class DioFactory {
         receiveTimeout: const Duration(seconds: 60),
         allowBadCertificates: false,
       ),
-      baseUrl: AnimeFlowApi.animeFlowApiDev,
+      baseUrl: AnimeFlowApi.animeFlowApi,
       adapter: FlowHttpClientAdapter(pool: FlowEndpointPool.instance),
     );
     Future<String>? deviceUserAgent;
