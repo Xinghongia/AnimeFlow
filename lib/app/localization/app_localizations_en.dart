@@ -1102,6 +1102,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get danmakuStyle => 'Danmaku style';
 
   @override
+  String get danmakuColor => 'Danmaku color';
+
+  @override
   String get showBorder => 'Show border';
 
   @override

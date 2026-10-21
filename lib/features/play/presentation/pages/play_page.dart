@@ -368,14 +368,15 @@ class _ContentViewState extends ConsumerState<_ContentView>
     super.dispose();
   }
 
-  Future<void> onSendDanmaku(String text) async {
+  Future<void> onSendDanmaku(String text, int type, Color color) async {
     final l10n = AppLocalizations.of(context);
     final userId = ref.read(currentUserInfoProvider).value?.id;
     if (userId == null) {
       NotificationToast.show(l10n.loginBeforeDanmaku, title: l10n.pleaseLogin);
       return;
     }
-    final success = await playSession.danmaku.send(text);
+    final success =
+        await playSession.danmaku.send(text, type: type, color: color);
     if (!mounted) return;
     NotificationToast.show(
       success ? l10n.danmakuSent : l10n.danmakuUnsupported,
@@ -433,7 +434,7 @@ class _ContentViewState extends ConsumerState<_ContentView>
                                   videoUiStateController.hideControlsUi();
                                 }
                               },
-                              onSend: (text) => onSendDanmaku(text),
+                              onSend: onSendDanmaku,
                               onClose: playSession.danmaku.toggleEnabled,
                             ),
                           );

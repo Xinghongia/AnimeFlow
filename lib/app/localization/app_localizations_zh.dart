@@ -1080,6 +1080,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get danmakuStyle => '弹幕样式';
 
   @override
+  String get danmakuColor => '弹幕颜色';
+
+  @override
   String get showBorder => '显示边框';
 
   @override
@@ -3517,6 +3520,9 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
 
   @override
   String get danmakuStyle => '弹幕样式';
+
+  @override
+  String get danmakuColor => '弹幕颜色';
 
   @override
   String get showBorder => '显示边框';
@@ -5957,6 +5963,9 @@ class AppLocalizationsZhHantHk extends AppLocalizationsZh {
   String get danmakuStyle => '彈幕樣式';
 
   @override
+  String get danmakuColor => '彈幕顏色';
+
+  @override
   String get showBorder => '顯示邊框';
 
   @override
@@ -8394,6 +8403,9 @@ class AppLocalizationsZhHantTw extends AppLocalizationsZh {
 
   @override
   String get danmakuStyle => '彈幕樣式';
+
+  @override
+  String get danmakuColor => '彈幕顏色';
 
   @override
   String get showBorder => '顯示邊框';

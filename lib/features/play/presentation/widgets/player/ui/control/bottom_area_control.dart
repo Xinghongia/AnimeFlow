@@ -568,8 +568,11 @@ class _DanmakuInputField extends ConsumerWidget {
     BuildContext context,
     PlaySession playController,
     String text,
+    int type,
+    Color color,
   ) async {
-    final success = await playController.danmaku.send(text);
+    final success =
+        await playController.danmaku.send(text, type: type, color: color);
     if (!context.mounted) return;
     final l10n = AppLocalizations.of(context);
     if (!success) {
@@ -600,7 +603,8 @@ class _DanmakuInputField extends ConsumerWidget {
             playController.startPlaying();
           }
         },
-        onSend: (message) => _onSend(context, playController, message),
+        onSend: (message, type, color) =>
+            _onSend(context, playController, message, type, color),
       );
     }
     return Container(

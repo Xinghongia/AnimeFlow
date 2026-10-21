@@ -350,6 +350,7 @@
   "bottomDanmaku": "底部弹幕",
   "danmakuSourcePlatform": "弹幕来源平台",
   "danmakuStyle": "弹幕样式",
+  "danmakuColor": "弹幕颜色",
   "showBorder": "显示边框",
   "fontStroke": "字体描边",
   "showColor": "显示颜色",

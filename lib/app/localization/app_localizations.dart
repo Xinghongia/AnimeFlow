@@ -2126,6 +2126,12 @@ abstract class AppLocalizations {
   /// **'弹幕样式'**
   String get danmakuStyle;
 
+  /// No description provided for @danmakuColor.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'弹幕颜色'**
+  String get danmakuColor;
+
   /// No description provided for @showBorder.
   ///
   /// In zh_Hans, this message translates to:
