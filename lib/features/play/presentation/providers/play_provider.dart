@@ -706,7 +706,7 @@ class PlaySession {
       localDanmakuPath = state.localDanmakuPath;
       danmaku.setPlaybackContext(
         subjectId: subjectId,
-        episode: episode,
+        episodeId: episodeId,
         isLocalPlayback: isLocalPlayback,
       );
       playbackProgressManager.setPlaybackContext(
@@ -734,7 +734,7 @@ class PlaySession {
     if (state.videoUrl.isEmpty) return;
     await danmaku.loadEpisode(
       subjectId: state.subjectId,
-      episode: state.episodeIndex,
+      episodeId: state.episodeId,
       isLocalPlayback: state.isLocalPlayback,
       localPath: localDanmakuPath,
       expectedRequestId: automaticDanmakuRequestId!,

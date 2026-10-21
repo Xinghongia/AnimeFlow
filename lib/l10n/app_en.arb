@@ -153,7 +153,7 @@
   "loginBeforeDanmaku": "Please log in before sending danmaku",
   "tip": "Tip",
   "danmakuSent": "Danmaku sent successfully",
-  "danmakuUnsupported": "Sending danmaku is not supported",
+  "danmakuUnsupported": "Sending danmaku is not supported in the current state",
   "episodeSelection": "Episodes",
   "subjectStillsTitle": "Preview images",
   "switchToList": "Switch to list",

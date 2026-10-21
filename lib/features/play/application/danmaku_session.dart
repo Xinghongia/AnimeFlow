@@ -44,7 +44,7 @@ class DanmakuSession {
   int _requestId = 0;
   bool _disposed = false;
   int _subjectId = 0;
-  int _episode = 0;
+  int _episodeId = 0;
   bool _isLocalPlayback = false;
   DanmakuCanvas? _canvas;
   late final DanmakuDispatchScheduler _scheduler = DanmakuDispatchScheduler(
@@ -99,11 +99,11 @@ class DanmakuSession {
 
   void setPlaybackContext({
     required int subjectId,
-    required int episode,
+    required int episodeId,
     required bool isLocalPlayback,
   }) {
     _subjectId = subjectId;
-    _episode = episode;
+    _episodeId = episodeId;
     _isLocalPlayback = isLocalPlayback;
   }
 
@@ -111,14 +111,14 @@ class DanmakuSession {
 
   Future<void> loadEpisode({
     required int subjectId,
-    required int episode,
+    required int episodeId,
     required bool isLocalPlayback,
     required String? localPath,
     required int expectedRequestId,
     required bool Function() isPlaybackCurrent,
   }) async {
     if (_disposed || expectedRequestId != _requestId) return;
-    if (episode == 0) {
+    if (!isLocalPlayback && (subjectId <= 0 || episodeId <= 0)) {
       _store.setLoadStatus(DanmakuLoadStatus.idle);
       return;
     }
@@ -132,10 +132,10 @@ class DanmakuSession {
       if (isLocalPlayback) {
         danmakus = await _loadLocal(localPath);
       } else {
-        final bangumiId =
-            await FlowApi.getDanDanBangumiIDByBgmBangumiID(subjectId);
-        if (!isCurrent() || bangumiId == null) return;
-        danmakus = await FlowApi.getDanDanmaku(bangumiId, episode);
+        danmakus = await FlowApi.getDanmaku(
+          subjectId: subjectId,
+          episodeId: episodeId,
+        );
       }
       if (danmakus.isEmpty) return;
       while (isCurrent()) {
@@ -205,37 +205,27 @@ class DanmakuSession {
 
   Future<bool> send(
     String message, {
-    required int bgmUserId,
     Color? color,
     int type = 1,
   }) async {
-    if (_isLocalPlayback) return false;
+    if (_disposed || _isLocalPlayback) return false;
     final trimmed = message.trim();
     if (trimmed.isEmpty) return false;
-    final subjectId = _subjectId;
-    final episode = _episode;
-    final requestId = _requestId;
-    final bangumiId =
-        await FlowApi.getDanDanBangumiIDByBgmBangumiID(subjectId);
-    if (bangumiId == null || _disposed || requestId != _requestId) return false;
+    if (_subjectId <= 0 || _episodeId <= 0) return false;
     final playback = readPlayback();
-    if (playback.duration == Duration.zero &&
-        playback.position == Duration.zero &&
-        episode <= 0) {
-      return false;
-    }
+    final userId = currentUserId();
     final item = Danmaku(
       message: trimmed,
       time: playback.position.inMicroseconds / Duration.microsecondsPerSecond,
       type: type,
       color: color ?? Colors.white,
-      bgmUserId: bgmUserId,
-      source: 'AnimeFlow',
+      bgmUserId: userId,
+      source: '[AnimeFlow]',
     );
-    _canvas?.addDanmaku(item, bgmUserId);
+    _canvas?.addDanmaku(item, userId);
     await FlowApi.sendDanmaku(
-      bangumiId,
-      episode,
+      subjectId: _subjectId,
+      episodeId: _episodeId,
       message: item.message,
       time: item.time,
       type: item.type,

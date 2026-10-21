@@ -482,7 +482,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get danmakuSent => 'Danmaku sent successfully';
 
   @override
-  String get danmakuUnsupported => 'Sending danmaku is not supported';
+  String get danmakuUnsupported =>
+      'Sending danmaku is not supported in the current state';
 
   @override
   String get episodeSelection => 'Episodes';

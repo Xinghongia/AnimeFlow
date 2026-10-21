@@ -326,6 +326,25 @@ class FlowApi {
     return null;
   }
 
+  /// 通过 Bangumi 条目和章节 ID 获取弹弹play与本站合并弹幕。
+  static Future<List<Danmaku>> getDanmaku({
+    required int subjectId,
+    required int episodeId,
+  }) async {
+    final response = await _client.get(
+      AnimeFlowApi.danmaku,
+      queryParameters: {
+        'subjectId': subjectId,
+        'episodeId': episodeId,
+        'withRelated': 'true'
+      },
+      options: Options(headers: {'X-Api-Version': '2'}),
+    );
+    final comments = response.data['comments'];
+    if (comments is! List) return [];
+    return comments.map((comment) => Danmaku.fromJson(comment)).toList();
+  }
+
   /// 获取弹幕
   static Future<List<Danmaku>> getDanDanmaku(int bangumiID, int episode) async {
     List<Danmaku> danmakus = [];
@@ -341,7 +360,7 @@ class FlowApi {
 
   /// 通过episodeID获取弹幕
   static Future<List<Danmaku>> getDanDanmakuByEpisodeID(int episodeID) async {
-    final path = '${AnimeFlowApi.danmaku}/$episodeID';
+    final path = '${AnimeFlowApi.getDanmaku}/$episodeID';
     final danmakus = <Danmaku>[];
     final response = await _client.get(
       path,
@@ -392,22 +411,20 @@ class FlowApi {
   }
 
   /// 发送弹幕
-  static Future<AnimeFlowResponse> sendDanmaku(
-    int bangumiID,
-    int episode, {
+  static Future<AnimeFlowResponse> sendDanmaku({
+    required int subjectId,
+    required int episodeId,
     required String message,
     required double time,
     required int type,
     required Color color,
   }) async {
-    final token = await FlowTokenStorage.instance.getToken();
-    final episodeID =
-        int.parse('$bangumiID${episode.toString().padLeft(4, '0')}');
     final colorValue = Utils.colorToDecimalRgb(color);
     return _client.post(
       AnimeFlowApi.danmaku,
       data: {
-        'episodeId': episodeID,
+        'subjectId': subjectId,
+        'episodeId': episodeId,
         'comment': message,
         'time': time,
         'type': type,
@@ -415,10 +432,10 @@ class FlowApi {
       },
       options: Options(
         headers: {
-          Constants.authorization: '${token!.tokenType} ${token.accessToken}',
+          'X-Api-Version': '2',
         },
       ),
-      includeFlowToken: false,
+      requireFlowToken: true,
     );
   }
 

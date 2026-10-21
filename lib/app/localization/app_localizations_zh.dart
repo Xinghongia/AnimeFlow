@@ -472,7 +472,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get danmakuSent => '弹幕发送成功';
 
   @override
-  String get danmakuUnsupported => '当前不支持发送弹幕';
+  String get danmakuUnsupported => '当前状态不支持发送弹幕';
 
   @override
   String get episodeSelection => '选集';
@@ -2911,7 +2911,7 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String get danmakuSent => '弹幕发送成功';
 
   @override
-  String get danmakuUnsupported => '当前不支持发送弹幕';
+  String get danmakuUnsupported => '当前状态不支持发送弹幕';
 
   @override
   String get episodeSelection => '选集';
@@ -5349,7 +5349,7 @@ class AppLocalizationsZhHantHk extends AppLocalizationsZh {
   String get danmakuSent => '彈幕發送成功';
 
   @override
-  String get danmakuUnsupported => '目前不支援發送彈幕';
+  String get danmakuUnsupported => '目前狀態不支援發送彈幕';
 
   @override
   String get episodeSelection => '選集';
@@ -7788,7 +7788,7 @@ class AppLocalizationsZhHantTw extends AppLocalizationsZh {
   String get danmakuSent => '彈幕發送成功';
 
   @override
-  String get danmakuUnsupported => '目前不支援發送彈幕';
+  String get danmakuUnsupported => '目前狀態不支援發送彈幕';
 
   @override
   String get episodeSelection => '選集';

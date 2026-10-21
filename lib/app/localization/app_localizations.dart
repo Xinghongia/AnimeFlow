@@ -953,7 +953,7 @@ abstract class AppLocalizations {
   /// No description provided for @danmakuUnsupported.
   ///
   /// In zh_Hans, this message translates to:
-  /// **'当前不支持发送弹幕'**
+  /// **'当前状态不支持发送弹幕'**
   String get danmakuUnsupported;
 
   /// No description provided for @episodeSelection.

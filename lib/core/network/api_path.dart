@@ -126,8 +126,8 @@ class AnimeFlowApi {
       /// 根据BGM番剧ID获取番剧详情
       animeDetailByBgmId = '/api/v1/danmaku/bangumi/bgmtv',
 
-      /// 弹幕
-      danmaku = '/api/v1/danmaku',
+      /// 弹幕 v2
+      danmaku = '/api/danmaku',
 
       /// 获取热门条目
       hot = '/api/v1/bangumi/trending/subjects',

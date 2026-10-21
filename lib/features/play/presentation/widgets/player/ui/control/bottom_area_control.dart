@@ -568,15 +568,13 @@ class _DanmakuInputField extends ConsumerWidget {
     BuildContext context,
     PlaySession playController,
     String text,
-    int userId,
   ) async {
-    final success = await playController.danmaku.send(text, bgmUserId: userId);
+    final success = await playController.danmaku.send(text);
     if (!context.mounted) return;
     final l10n = AppLocalizations.of(context);
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-          content: Text(success ? l10n.danmakuSent : l10n.danmakuUnsupported)),
-    );
+    if (!success) {
+      NotificationToast.show(l10n.danmakuUnsupported, title: '提示');
+    }
   }
 
   @override
@@ -602,7 +600,7 @@ class _DanmakuInputField extends ConsumerWidget {
             playController.startPlaying();
           }
         },
-        onSend: (message) => _onSend(context, playController, message, userId),
+        onSend: (message) => _onSend(context, playController, message),
       );
     }
     return Container(

@@ -375,10 +375,7 @@ class _ContentViewState extends ConsumerState<_ContentView>
       NotificationToast.show(l10n.loginBeforeDanmaku, title: l10n.pleaseLogin);
       return;
     }
-    final success = await playSession.danmaku.send(
-      text,
-      bgmUserId: userId,
-    );
+    final success = await playSession.danmaku.send(text);
     if (!mounted) return;
     NotificationToast.show(
       success ? l10n.danmakuSent : l10n.danmakuUnsupported,

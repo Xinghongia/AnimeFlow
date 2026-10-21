@@ -153,7 +153,7 @@
   "loginBeforeDanmaku": "请先登录后再发送弹幕",
   "tip": "提示",
   "danmakuSent": "弹幕发送成功",
-  "danmakuUnsupported": "当前不支持发送弹幕",
+  "danmakuUnsupported": "当前状态不支持发送弹幕",
   "episodeSelection": "选集",
   "subjectStillsTitle": "预览图",
   "switchToList": "切换到列表",
