@@ -157,14 +157,13 @@ class RuleEngine {
     required String keyword,
     required CrawlConfigItem config,
   }) async {
-    final searchKeyword = keyword.replaceAll(RegExp(r'\s+'), '');
     final usesApi = config.usesApiSearch;
     final items = await _execute<List<SearchResourcesItem>>(
       config: config,
       phase: 'search',
       prepare: () => usesApi
-          ? _api.prepareSearchRequest(config, searchKeyword)
-          : _xpath.prepareSearchRequest(config, searchKeyword),
+          ? _api.prepareSearchRequest(config, keyword)
+          : _xpath.prepareSearchRequest(config, keyword),
       parse: usesApi
           ? (raw) async => _api.parseSearch(raw, config)
           : (raw) => _xpath.parseSearch(raw, config),
